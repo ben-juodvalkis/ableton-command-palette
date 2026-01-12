@@ -101,8 +101,15 @@ ableton-command-palette/
 - [ ] Create `CommandPalette.amxd` as Audio Effect
 - [ ] Add device info/description
 - [ ] Set up `jsui` for palette window
-- [ ] Implement hotkey trigger (Cmd/Ctrl+Shift+P)
+- [ ] Use `live.toggle` for palette trigger (MIDI-mappable, works without focus)
+- [ ] Use `v8` object instead of legacy `js` for ES6+ and module support
+- [ ] Document patcher wiring with subpatchers for clarity
 - [ ] Add "About" panel with version, GitHub link, license
+
+#### 1.2.1 Device API Compatibility
+- [ ] Test `create_device` vs `insert_device` on Live 12.0, 12.1+
+- [ ] Document working methods for each device category (audio effects, MIDI effects, instruments)
+- [ ] Create `DeviceInsertion.js` compatibility module
 
 #### 1.3 Extensible Command System
 
@@ -934,10 +941,10 @@ Use GitHub Discussions polls to prioritize features:
 ### Overview
 
 ```
-User Input (Keyboard)
+User Input (MIDI-mapped key or controller)
          ↓
 ┌────────────────────┐
-│  Hotkey Detection  │ ← key object in Max
+│   live.toggle      │ ← MIDI-mappable in Live (works without focus)
 └────────────────────┘
          ↓
 ┌────────────────────┐
@@ -971,52 +978,89 @@ User Input (Keyboard)
 
 ### Core Modules
 
+**Note:** Using `v8` object with ES modules for modern JavaScript support.
+
+```
+src/
+├── CommandPalette.amxd
+├── main.js                    ← v8 entry point
+├── modules/
+│   ├── CommandRegistry.js     ← ES modules (import/export)
+│   ├── FuzzyMatcher.js
+│   ├── LOMInterface.js
+│   ├── DeviceInsertion.js     ← Compatibility layer for device APIs
+│   └── PaletteUI.js
+└── commands/
+    └── core/
+        └── *.json
+```
+
 #### CommandRegistry.js
 ```javascript
-// Loads and manages all commands
-- loadCommands() - Load from JSON files
-- registerCommand() - Add command to registry
-- getCommandById() - Retrieve specific command
-- getAllCommands() - Get all commands
-- getCommandsByCategory() - Filter by category
+// Loads and manages all commands (ES module)
+export class CommandRegistry {
+  loadCommands() - Load from JSON files
+  registerCommand() - Add command to registry
+  getCommandById() - Retrieve specific command
+  getAllCommands() - Get all commands
+  getCommandsByCategory() - Filter by category
+}
 ```
 
 #### FuzzyMatcher.js
 ```javascript
-// Fuzzy search algorithm
-- fuzzyMatch(query, target) - Score a single match
-- fuzzySearch(query, commands) - Search all commands
-- scoreCommand() - Calculate relevance score
-- sortResults() - Sort by score and recency
+// Fuzzy search algorithm (ES module)
+export class FuzzyMatcher {
+  fuzzyMatch(query, target) - Score a single match
+  fuzzySearch(query, commands) - Search all commands
+  scoreCommand() - Calculate relevance score
+  sortResults() - Sort by score and recency
+}
 ```
 
 #### LOMInterface.js
 ```javascript
-// Wrapper for Live Object Model
-- getCurrentContext() - Get current Live state
-- getSelectedTrack() - Get selected track info
-- getTrackByName(name) - Find track by name
-- executeCommand(commandId, params) - Run command
-- cacheQuery() - Cache LOM results
+// Wrapper for Live Object Model (ES module)
+export class LOMInterface {
+  getCurrentContext() - Get current Live state
+  getSelectedTrack() - Get selected track info
+  getTrackByName(name) - Find track by name
+  executeCommand(commandId, params) - Run command
+  cacheQuery() - Cache LOM results
+}
+```
+
+#### DeviceInsertion.js
+```javascript
+// Compatibility layer for device insertion APIs (ES module)
+export class DeviceInsertion {
+  insertDevice(trackApi, deviceName) - Insert device with version-appropriate method
+  getAvailableDevices() - List insertable devices
+  supportsDeviceType(type) - Check if device type is supported
+}
 ```
 
 #### PaletteUI.js
 ```javascript
-// UI controller
-- show() - Display palette
-- hide() - Close palette
-- updateResults(results) - Refresh display
-- handleKeyboard(key) - Process keyboard input
-- render() - Draw UI
+// UI controller (ES module)
+export class PaletteUI {
+  show() - Display palette
+  hide() - Close palette
+  updateResults(results) - Refresh display
+  handleKeyboard(key) - Process keyboard input
+  render() - Draw UI
+}
 ```
 
 #### ExtensionLoader.js
 ```javascript
-// Extension management
-- loadExtensions() - Load community commands
-- validateCommand() - Check command schema
-- registerExtension() - Add extension commands
-- getExtensionCommands() - List extension commands
+// Extension management (ES module)
+export class ExtensionLoader {
+  loadExtensions() - Load community commands
+  validateCommand() - Check command schema
+  registerExtension() - Add extension commands
+  getExtensionCommands() - List extension commands
+}
 ```
 
 ### Data Flow
@@ -1626,6 +1670,8 @@ function getWarningLevel(command) {
 | Extension conflicts | Low | Medium | Sandboxing, validation, error handling |
 | Max/MSP limitations | Low | High | Document limitations clearly, provide workarounds |
 | Platform-specific bugs | Medium | Medium | Cross-platform testing, platform-specific code paths |
+| V8 module loading issues | Low | Medium | Address if issues arise during implementation |
+| Device insertion API differences | Medium | Medium | DeviceInsertion.js compatibility layer, test across Live versions |
 
 ### Community Risks
 

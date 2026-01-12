@@ -77,10 +77,34 @@ Build a minimal prototype with:
 **Decision: GO** — Proceed with full implementation.
 
 Recommended priorities for Phase 1:
-1. Investigate `hi` object or MIDI mapping for global hotkey
+1. Use `live.toggle` for MIDI-mappable palette trigger
 2. Build extensible command registry (JSON-based)
 3. Implement fuzzy matching algorithm
 4. Expand to 25 core commands
+
+---
+
+## Learnings for Full Implementation
+
+### 1. Trigger Mechanism: `live.toggle` Solution
+- **Finding:** `key` object requires Max focus, limiting usability
+- **Solution:** Use `live.toggle` which can be MIDI-mapped in Live
+- **Benefit:** User chooses their own trigger key, works globally without focus
+
+### 2. V8 Object for Modern JavaScript
+- **Finding:** Legacy `js` object lacks ES6+, modules, proper imports
+- **Decision:** Use `v8` object (Live 12+ required anyway)
+- **Enables:** `import/export`, proper modular architecture, better performance
+
+### 3. Device Insertion API
+- **Finding:** `create_device` behavior uncertain across Live versions
+- **Action:** Document exact LOM methods early, create `DeviceInsertion.js` compatibility layer
+
+### 4. Text Input Wiring Complexity
+- **Finding:** Separating navigation keys (↑↓ Enter Esc) from text input requires careful Max wiring
+- **Action:** Document patcher wiring clearly, use subpatchers for organization
+
+---
 
 ## References
 
