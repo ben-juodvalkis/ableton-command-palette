@@ -1,0 +1,58 @@
+[
+  {
+    "id": "nav.nextTrack",
+    "title": "Select Next Track",
+    "category": "Navigation",
+    "keywords": ["right", "forward", "next"],
+    "description": "Select the next track",
+    "action": "nav.nextTrack"
+  },
+  {
+    "id": "nav.prevTrack",
+    "title": "Select Previous Track",
+    "category": "Navigation",
+    "keywords": ["left", "back", "previous"],
+    "description": "Select the previous track",
+    "action": "nav.prevTrack"
+  },
+  {
+    "id": "nav.nextDevice",
+    "title": "Select Next Device",
+    "category": "Navigation",
+    "keywords": ["right", "forward", "plugin", "next"],
+    "description": "Select the next device",
+    "action": "nav.nextDevice"
+  },
+  {
+    "id": "nav.prevDevice",
+    "title": "Select Previous Device",
+    "category": "Navigation",
+    "keywords": ["left", "back", "plugin", "previous"],
+    "description": "Select the previous device",
+    "action": "nav.prevDevice"
+  },
+  {
+    "id": "nav.nextScene",
+    "title": "Select Next Scene",
+    "category": "Navigation",
+    "keywords": ["down", "scene", "next"],
+    "description": "Select the next scene",
+    "action": "nav.nextScene"
+  },
+  {
+    "id": "nav.prevScene",
+    "title": "Select Previous Scene",
+    "category": "Navigation",
+    "keywords": ["up", "scene", "previous"],
+    "description": "Select the previous scene",
+    "action": "nav.prevScene"
+  },
+  {
+    "id": "nav.focusBrowser",
+    "title": "Focus Browser",
+    "category": "Navigation",
+    "keywords": ["sidebar", "files", "search", "browse"],
+    "description": "Focus the browser panel",
+    "action": "nav.focusBrowser"
+  }
+]
