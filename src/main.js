@@ -10,8 +10,8 @@ const { FuzzyMatcher } = require('./core/FuzzyMatcher.js');
 const { LOMInterface } = require('./core/LOMInterface.js');
 
 // Max v8 globals
-const inlets = 1;
-const outlets = 2; // outlet 0: to jsui, outlet 1: bang when palette closes
+inlets = 1;
+outlets = 2; // outlet 0: to v8ui, outlet 1: bang when palette closes
 
 // State
 let paletteVisible = false;
