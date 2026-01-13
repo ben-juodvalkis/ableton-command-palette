@@ -154,10 +154,10 @@ live.toggle → triggers palette open/close
 
 Handle all text input directly in v8 (no textedit object):
 - [x] Route `key` object to v8 for all keypresses
-- [ ] Capture printable characters (a-z, 0-9, space, punctuation)
-- [ ] Handle backspace to delete characters
-- [ ] Build search string from keypresses
-- [ ] v8ui already displays `searchQuery` - no changes needed there
+- [x] Capture printable characters (a-z, 0-9, space, punctuation)
+- [x] Handle backspace to delete characters
+- [x] Build search string from keypresses
+- [x] v8ui already displays `searchQuery` - no changes needed there
 
 ### 1.2 Core Modules
 
@@ -692,6 +692,36 @@ Navigation (7):
 3. Validate all 25 command executors work correctly
 4. Begin Phase 2: fuzzy search polish and context filtering
 
+### 2026-01-13
+
+**Status:** Native Keyboard Input Complete
+
+Implemented full keyboard text input handling in `keydown()` function:
+
+**Changes to `src/main.js`:**
+- Added printable character capture (ASCII 32-126: letters, digits, space, punctuation)
+- Added backspace/delete handling (keycodes 8 and 127)
+- Characters append to `searchQuery` and trigger `search()` in real-time
+- Backspace removes last character and updates search results
+- Changed switch statement to use early `return` for cleaner control flow
+
+**Keyboard Input Now Supports:**
+- `a-z`, `A-Z` - letters (converted via `String.fromCharCode`)
+- `0-9` - digits
+- Space, punctuation (`!@#$%^&*()` etc.)
+- Backspace - delete last character
+- Arrow Up/Down - navigate results
+- Enter - execute selected command
+- Escape - close palette
+
+**Architecture Note:**
+No separate `textedit` object needed. The `key` object routes all keypresses to v8, which builds the search string natively. This provides VS Code-style UX where the palette captures all input when open.
+
+**Next Steps:**
+1. Test in Max for Live - validate key object sends correct ASCII codes
+2. Consider Tab key for autocomplete (keycode 9)
+3. Begin Phase 2: context-aware filtering and 50 additional commands
+
 ---
 
-*Last Updated: 2026-01-12*
+*Last Updated: 2026-01-13*
