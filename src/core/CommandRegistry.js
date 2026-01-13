@@ -5,7 +5,7 @@
  * Commands are organized by category and can be queried by ID or category.
  */
 
-export class CommandRegistry {
+class CommandRegistry {
     constructor() {
         this.commands = new Map();
         this.categories = new Map();
@@ -99,3 +99,5 @@ export class CommandRegistry {
         this.categories.clear();
     }
 }
+
+module.exports = { CommandRegistry: CommandRegistry };

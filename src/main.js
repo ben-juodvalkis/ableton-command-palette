@@ -1,13 +1,13 @@
 /**
  * Ableton Command Palette - Main Entry Point
  *
- * v8 entry point with ES6 modules for Max for Live.
+ * v8 entry point with CommonJS modules for Max for Live.
  * Handles palette state, coordinates between UI and command execution.
  */
 
-import { CommandRegistry } from './core/CommandRegistry.mjs';
-import { FuzzyMatcher } from './core/FuzzyMatcher.mjs';
-import { LOMInterface } from './core/LOMInterface.mjs';
+const { CommandRegistry } = require('./core/CommandRegistry.js');
+const { FuzzyMatcher } = require('./core/FuzzyMatcher.js');
+const { LOMInterface } = require('./core/LOMInterface.js');
 
 // Max v8 globals
 const inlets = 1;
@@ -442,6 +442,3 @@ const navigationCommands = [
         action: "nav.focusBrowser"
     }
 ];
-
-// Export for Max v8
-export { loadbang, msg_int, anything };

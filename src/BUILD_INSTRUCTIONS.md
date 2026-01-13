@@ -4,7 +4,7 @@ This document describes how to create the CommandPalette.amxd Max for Live devic
 
 ## Prerequisites
 
-- Max 8.5+ (included with Live 12)
+- Max 9+ (included with Live 12)
 - Ableton Live 12+
 
 ## Creating the Max Patcher
@@ -40,15 +40,15 @@ Create the following objects in the Max patcher:
 │         │                                                       │
 │         ▼                                                       │
 │  ┌──────────────────────────────────────────────────────┐       │
-│  │                      v8 main.mjs                      │       │
+│  │                      v8 main.js                       │       │
 │  └────────┬────────────────────────────────┬────────────┘       │
 │           │ outlet 0                       │ outlet 1           │
-│           │ (to jsui)                      │ (close bang)       │
+│           │ (to v8ui)                      │ (close bang)       │
 │           ▼                                ▼                    │
 │  ┌─────────────────┐               ┌──────────────┐             │
-│  │  jsui           │               │  t b         │             │
+│  │  v8ui           │               │  t b         │             │
 │  │  @filename      │               │  (trigger)   │             │
-│  │  ui/palette.mjs │               └──────┬───────┘             │
+│  │  ui/palette.js  │               └──────┬───────┘             │
 │  │  @size 400 350  │                      │                     │
 │  └─────────────────┘                      │                     │
 │                                           │                     │
@@ -87,18 +87,20 @@ live.toggle @parameter_longname "Open Palette" @parameter_shortname "Open"
 
 #### v8 object
 ```
-v8 main.mjs
+v8 main.js
 ```
-- The v8 object runs ES6 modules
+- The v8 object runs modern JavaScript (ES6+)
+- Uses CommonJS `require()` for modules
 - Set the search path to include the `src/` folder
 
-#### jsui
+#### v8ui
 ```
-jsui @filename ui/palette.mjs @size 400 350 @border 0 @ignoreclick 0
+v8ui @filename ui/palette.js @size 400 350 @border 0 @ignoreclick 0
 ```
 - Size: 400x350 pixels
 - No border for clean look
 - Accept mouse clicks for future interaction
+- v8ui supports ES6 syntax (const, let, template literals, arrow functions)
 
 #### textedit
 ```
@@ -118,14 +120,14 @@ key
 ### 4. Connections
 
 1. `live.toggle` output → `prepend toggle` → `v8` inlet
-2. `v8` outlet 0 → `jsui` inlet (for display data)
+2. `v8` outlet 0 → `v8ui` inlet (for display data)
 3. `v8` outlet 1 → clear `textedit` (on palette close)
 4. `textedit` output → `prepend text` → `v8` inlet
 5. `key` output → `prepend key` → `v8` inlet
 
 ### 5. File Paths
 
-Ensure the v8 object can find the .mjs files. You may need to:
+Ensure the v8 object can find the .js files. You may need to:
 
 1. Add the `src/` folder to Max's search path
 2. Or use absolute paths in the v8 object
@@ -144,7 +146,7 @@ To add search path in Max:
 
 1. Close Max editor
 2. In Live, toggle the `live.toggle` parameter
-3. The palette should appear in the jsui
+3. The palette should appear in the v8ui
 4. Type in the textedit to search
 5. Use arrow keys to navigate, Enter to execute, Escape to close
 
@@ -153,10 +155,10 @@ To add search path in Max:
 ### v8 module loading issues
 - Check that file paths are correct
 - Look at Max console for error messages
-- Ensure all .mjs files have proper export statements
+- Ensure all .js files use CommonJS exports (`module.exports = {...}`)
 
-### jsui not updating
-- Send a `bang` to jsui to force redraw
+### v8ui not updating
+- Send a `bang` to v8ui to force redraw
 - Check that display data JSON is valid
 
 ### Keyboard input not working
@@ -165,9 +167,9 @@ To add search path in Max:
 
 ## Alternative: Single-File Fallback
 
-If ES6 modules cause issues, you can fall back to a single-file approach:
+If CommonJS modules cause issues, you can fall back to a single-file approach:
 1. Copy all module code into one file
 2. Use the legacy `js` object instead of `v8`
-3. Remove import/export statements
+3. Remove require/module.exports statements
 
 See `prototype/proto.js` for the single-file approach.
