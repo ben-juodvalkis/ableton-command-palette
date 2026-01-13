@@ -5,8 +5,60 @@
 A VS Code-inspired command palette for Ableton Live built as a Max for Live device, providing keyboard-driven access to Live functionality via fuzzy search.
 
 **Target:** Ableton Live 12+ only
-**Runtime:** Max `v8` object (ES6+ with modules)
+**Runtime:** Max `v8` object (CommonJS modules)
 **License:** MIT
+
+---
+
+## Decision Log
+
+### 2026-01-13: CommonJS over ES6 Modules
+
+**Problem:** ES6 `import`/`export` syntax caused errors in Max v8 object.
+```
+v8: SyntaxError: Cannot use import statement outside a module
+```
+
+**Investigation:** Searched Cycling '74 documentation and forums. Found that Max v8 supports CommonJS modules only (`require()`/`module.exports`), not ES6 module syntax.
+
+**Decision:** Convert all modules from ES6 to CommonJS.
+- `.mjs` files renamed to `.js`
+- `import { X } from './X.mjs'` → `const { X } = require('./X.js')`
+- `export class X` → `class X { } module.exports = { X }`
+
+### 2026-01-13: v8ui over jsui
+
+**Problem:** jsui threw syntax errors on ES6 code (`let`, `const`, template literals).
+```
+jsui: Javascript SyntaxError: missing ; before statement, line 50
+jsui: source line: let displayState = {
+```
+
+**Investigation:** jsui uses the legacy `js` engine (ES5 only). The v8ui object uses the same V8 engine as v8, supporting ES6+.
+
+**Decision:** Replace jsui with v8ui for palette rendering. This allows modern JavaScript in both main logic and UI.
+
+### 2026-01-13: Native Keyboard Input over textedit
+
+**Problem:** Original design used a separate `textedit` object for search input. This creates poor UX - user has to click into textedit, and it's visually disconnected from the palette.
+
+**Options considered:**
+1. Keep textedit, overlay/style it to look integrated
+2. Build keyboard input directly into v8 (handle keypresses, build search string)
+3. Hybrid approach for Phase 1
+
+**Decision:** Option 2 - handle all keyboard input in v8. This gives VS Code-style UX where the palette captures all input when open. The v8ui already displays the search query, so only need to expand `keydown()` to handle printable characters and backspace.
+
+### 2026-01-13: v8 globals assignment
+
+**Problem:** Declaring `const inlets = 1` caused redeclaration error.
+```
+v8: SyntaxError: Identifier 'inlets' has already been declared
+```
+
+**Cause:** Max v8 pre-declares `inlets` and `outlets` as global variables.
+
+**Decision:** Assign directly without `const`/`let`: `inlets = 1;`
 
 ---
 
@@ -22,12 +74,12 @@ User Input (MIDI-mapped toggle)
          │
          ▼
 ┌────────────────────┐
-│  Palette UI (jsui) │ ← Floating window with search + results
+│  Palette UI (v8ui) │ ← Renders search + results (ES6)
 └────────────────────┘
          │
          ▼
 ┌────────────────────┐
-│  v8 Main Module    │ ← ES6 modules, import/export
+│  v8 Main Module    │ ← CommonJS modules
 │  - CommandRegistry │
 │  - FuzzyMatcher    │
 │  - LOMInterface    │
@@ -45,14 +97,14 @@ User Input (MIDI-mapped toggle)
 ableton-command-palette/
 ├── src/
 │   ├── CommandPalette.amxd      # Max patcher
-│   ├── main.mjs                 # v8 entry point
+│   ├── main.js                  # v8 entry point (CommonJS)
 │   ├── ui/
-│   │   └── palette.mjs          # jsui rendering
+│   │   └── palette.js           # v8ui rendering (ES6)
 │   ├── core/
-│   │   ├── CommandRegistry.mjs  # Command loading & management
-│   │   ├── FuzzyMatcher.mjs     # Search algorithm
-│   │   └── LOMInterface.mjs     # Live API wrapper
-│   └── commands/
+│   │   ├── CommandRegistry.js   # Command loading & management
+│   │   ├── FuzzyMatcher.js      # Search algorithm
+│   │   └── LOMInterface.js      # Live API wrapper
+│   └── commands/                # (future: external JSON files)
 │       ├── transport.json       # Transport commands
 │       ├── tracks.json          # Track commands
 │       ├── devices.json         # Device commands
@@ -80,11 +132,16 @@ ableton-command-palette/
 ### 1.1 Max Patcher Setup
 
 Create `CommandPalette.amxd`:
-- [ ] Add `live.toggle` for MIDI-mappable palette trigger
-- [ ] Add `v8` object pointing to `main.mjs`
-- [ ] Add `jsui` for palette rendering
-- [ ] Wire keyboard input (arrow keys, escape, enter)
-- [ ] Add `textedit` for search input
+- [x] Add `live.toggle` for MIDI-mappable palette trigger
+- [x] Add `v8` object pointing to `main.js` (CommonJS modules)
+- [x] Add `v8ui` for palette rendering (ES6 syntax supported)
+- [x] Wire keyboard input via `key` object to v8
+- [x] Native keyboard text input in v8 (no separate textedit)
+
+**Architecture Notes (discovered during implementation):**
+- Max v8 uses CommonJS `require()`/`module.exports`, NOT ES6 `import`/`export`
+- jsui only supports ES5; use `v8ui` for ES6 syntax
+- v8 pre-declares `inlets`/`outlets` - assign directly, don't use `const`
 
 **Trigger Mechanism:**
 ```
@@ -92,6 +149,15 @@ live.toggle → triggers palette open/close
               MIDI-mappable by user in Live
               Works even when device doesn't have focus
 ```
+
+### 1.1b Native Keyboard Input
+
+Handle all text input directly in v8 (no textedit object):
+- [x] Route `key` object to v8 for all keypresses
+- [x] Capture printable characters (a-z, 0-9, space, punctuation)
+- [x] Handle backspace to delete characters
+- [x] Build search string from keypresses
+- [x] v8ui already displays `searchQuery` - no changes needed there
 
 ### 1.2 Core Modules
 
@@ -626,6 +692,36 @@ Navigation (7):
 3. Validate all 25 command executors work correctly
 4. Begin Phase 2: fuzzy search polish and context filtering
 
+### 2026-01-13
+
+**Status:** Native Keyboard Input Complete
+
+Implemented full keyboard text input handling in `keydown()` function:
+
+**Changes to `src/main.js`:**
+- Added printable character capture (ASCII 32-126: letters, digits, space, punctuation)
+- Added backspace/delete handling (keycodes 8 and 127)
+- Characters append to `searchQuery` and trigger `search()` in real-time
+- Backspace removes last character and updates search results
+- Changed switch statement to use early `return` for cleaner control flow
+
+**Keyboard Input Now Supports:**
+- `a-z`, `A-Z` - letters (converted via `String.fromCharCode`)
+- `0-9` - digits
+- Space, punctuation (`!@#$%^&*()` etc.)
+- Backspace - delete last character
+- Arrow Up/Down - navigate results
+- Enter - execute selected command
+- Escape - close palette
+
+**Architecture Note:**
+No separate `textedit` object needed. The `key` object routes all keypresses to v8, which builds the search string natively. This provides VS Code-style UX where the palette captures all input when open.
+
+**Next Steps:**
+1. Test in Max for Live - validate key object sends correct ASCII codes
+2. Consider Tab key for autocomplete (keycode 9)
+3. Begin Phase 2: context-aware filtering and 50 additional commands
+
 ---
 
-*Last Updated: 2026-01-12*
+*Last Updated: 2026-01-13*

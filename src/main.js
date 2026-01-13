@@ -1,17 +1,17 @@
 /**
  * Ableton Command Palette - Main Entry Point
  *
- * v8 entry point with ES6 modules for Max for Live.
+ * v8 entry point with CommonJS modules for Max for Live.
  * Handles palette state, coordinates between UI and command execution.
  */
 
-import { CommandRegistry } from './core/CommandRegistry.mjs';
-import { FuzzyMatcher } from './core/FuzzyMatcher.mjs';
-import { LOMInterface } from './core/LOMInterface.mjs';
+const { CommandRegistry } = require('./core/CommandRegistry.js');
+const { FuzzyMatcher } = require('./core/FuzzyMatcher.js');
+const { LOMInterface } = require('./core/LOMInterface.js');
 
 // Max v8 globals
-const inlets = 1;
-const outlets = 2; // outlet 0: to jsui, outlet 1: bang when palette closes
+inlets = 1;
+outlets = 2; // outlet 0: to v8ui, outlet 1: bang when palette closes
 
 // State
 let paletteVisible = false;
@@ -155,29 +155,56 @@ function search(query) {
 // KEYBOARD HANDLING
 // ============================================================================
 
+/**
+ * Handle keyboard input for the palette.
+ * Supports:
+ * - Navigation: Arrow Up/Down, Enter, Escape
+ * - Text input: Printable characters (a-z, 0-9, space, punctuation)
+ * - Editing: Backspace/Delete
+ *
+ * @param {number} keycode - ASCII key code from Max key object
+ */
 function keydown(keycode) {
     if (!paletteVisible) return;
 
+    // Navigation and control keys
     switch (keycode) {
         case 27: // Escape
             closePalette();
-            break;
+            return;
 
         case 13: // Enter/Return
             executeSelected();
-            break;
+            return;
 
         case 38: // Up Arrow
         case 30: // Max sometimes sends 30 for up
             selectedIndex = Math.max(0, selectedIndex - 1);
             redraw();
-            break;
+            return;
 
         case 40: // Down Arrow
         case 31: // Max sometimes sends 31 for down
             selectedIndex = Math.min(filteredCommands.length - 1, selectedIndex + 1);
             redraw();
-            break;
+            return;
+
+        case 8:   // Backspace
+        case 127: // Delete (some systems)
+            if (searchQuery.length > 0) {
+                searchQuery = searchQuery.slice(0, -1);
+                search(searchQuery);
+            }
+            return;
+    }
+
+    // Printable characters (ASCII 32-126)
+    // 32 = space, 33-47 = punctuation, 48-57 = digits, 58-64 = punctuation,
+    // 65-90 = uppercase, 91-96 = punctuation, 97-122 = lowercase, 123-126 = punctuation
+    if (keycode >= 32 && keycode <= 126) {
+        const char = String.fromCharCode(keycode);
+        searchQuery += char;
+        search(searchQuery);
     }
 }
 
@@ -442,6 +469,3 @@ const navigationCommands = [
         action: "nav.focusBrowser"
     }
 ];
-
-// Export for Max v8
-export { loadbang, msg_int, anything };

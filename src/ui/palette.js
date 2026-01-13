@@ -1,11 +1,13 @@
 /**
- * Palette UI - jsui Rendering
+ * Palette UI - v8ui Rendering
  *
- * Renders the command palette interface using jsui graphics.
- * Receives display data from main.mjs and draws the UI.
+ * Renders the command palette interface using v8ui graphics.
+ * Receives display data from main.js and draws the UI.
+ *
+ * Uses ES6 syntax (v8ui supports modern JavaScript).
  */
 
-// jsui setup
+// v8ui setup
 mgraphics.init();
 mgraphics.relative_coords = 0;
 mgraphics.autofill = 0;
@@ -310,9 +312,6 @@ function roundRect(x, y, w, h, r) {
 // ============================================================================
 
 function loadbang() {
-    post("Palette UI (v8) loaded\n");
+    post("Palette UI (v8ui) loaded\n");
     mgraphics.redraw();
 }
-
-// Export for v8
-export { loadbang, anything, bang, paint };

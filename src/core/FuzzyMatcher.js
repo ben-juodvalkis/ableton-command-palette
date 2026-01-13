@@ -5,7 +5,7 @@
  * Provides scoring based on consecutive matches, word boundaries, and position.
  */
 
-export class FuzzyMatcher {
+class FuzzyMatcher {
     constructor() {
         // Scoring weights
         this.weights = {
@@ -182,3 +182,5 @@ export class FuzzyMatcher {
         return segments;
     }
 }
+
+module.exports = { FuzzyMatcher: FuzzyMatcher };
