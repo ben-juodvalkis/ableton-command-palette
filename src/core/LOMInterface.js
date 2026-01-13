@@ -3,11 +3,21 @@
  *
  * Wrapper around Ableton's Live API (LiveAPI) providing
  * a clean interface for command execution.
+ *
+ * Design Decision: LiveAPI Object Management
+ * - Static paths (live_set, live_set view) are cached as singletons
+ * - Dynamic paths (tracks N, devices N) are created per-call
+ * - See ADR 002 for rationale
  */
 
 class LOMInterface {
     constructor() {
         const self = this;
+
+        // Cached LiveAPI objects for static paths
+        // These are safe to reuse as their paths never change
+        this._liveSetApi = null;
+        this._viewApi = null;
 
         // Action handlers map action strings to methods
         this.handlers = {
@@ -58,56 +68,82 @@ class LOMInterface {
     }
 
     // ============================================================================
+    // CACHED API ACCESSORS
+    // ============================================================================
+
+    /**
+     * Get cached LiveAPI for live_set (singleton)
+     * @returns {LiveAPI} Cached live_set API object
+     */
+    _getLiveSetApi() {
+        if (!this._liveSetApi) {
+            this._liveSetApi = new LiveAPI("live_set");
+        }
+        return this._liveSetApi;
+    }
+
+    /**
+     * Get cached LiveAPI for live_set view (singleton)
+     * @returns {LiveAPI} Cached view API object
+     */
+    _getViewApi() {
+        if (!this._viewApi) {
+            this._viewApi = new LiveAPI("live_set view");
+        }
+        return this._viewApi;
+    }
+
+    // ============================================================================
     // TRANSPORT COMMANDS
     // ============================================================================
 
     transportPlay() {
-        const api = new LiveAPI("live_set");
+        const api = this._getLiveSetApi();
         api.call("start_playing");
         post("Transport: Play\n");
     }
 
     transportStop() {
-        const api = new LiveAPI("live_set");
+        const api = this._getLiveSetApi();
         api.call("stop_playing");
         post("Transport: Stop\n");
     }
 
     transportRecord() {
-        const api = new LiveAPI("live_set");
+        const api = this._getLiveSetApi();
         const current = api.get("record_mode");
         api.set("record_mode", current == 1 ? 0 : 1);
         post(`Transport: Record ${current == 1 ? "Off" : "On"}\n`);
     }
 
     transportLoop() {
-        const api = new LiveAPI("live_set");
+        const api = this._getLiveSetApi();
         const current = api.get("loop");
         api.set("loop", current == 1 ? 0 : 1);
         post(`Transport: Loop ${current == 1 ? "Off" : "On"}\n`);
     }
 
     transportMetronome() {
-        const api = new LiveAPI("live_set");
+        const api = this._getLiveSetApi();
         const current = api.get("metronome");
         api.set("metronome", current == 1 ? 0 : 1);
         post(`Transport: Metronome ${current == 1 ? "Off" : "On"}\n`);
     }
 
     transportTapTempo() {
-        const api = new LiveAPI("live_set");
+        const api = this._getLiveSetApi();
         api.call("tap_tempo");
         post("Transport: Tap Tempo\n");
     }
 
     transportArrangement() {
-        const api = new LiveAPI("live_set view");
+        const api = this._getViewApi();
         api.set("focused_document_view", 1); // 1 = Arrangement
         post("Transport: Arrangement View\n");
     }
 
     transportSession() {
-        const api = new LiveAPI("live_set view");
+        const api = this._getViewApi();
         api.set("focused_document_view", 0); // 0 = Session
         post("Transport: Session View\n");
     }
@@ -176,13 +212,13 @@ class LOMInterface {
     }
 
     trackCreateAudio() {
-        const api = new LiveAPI("live_set");
+        const api = this._getLiveSetApi();
         api.call("create_audio_track", -1); // -1 = at end
         post("Track: Created Audio Track\n");
     }
 
     trackCreateMidi() {
-        const api = new LiveAPI("live_set");
+        const api = this._getLiveSetApi();
         api.call("create_midi_track", -1); // -1 = at end
         post("Track: Created MIDI Track\n");
     }
@@ -191,7 +227,7 @@ class LOMInterface {
         const track = this._getSelectedTrack();
         if (!track) return;
 
-        const api = new LiveAPI("live_set");
+        const api = this._getLiveSetApi();
         const trackPath = track.path;
 
         // Extract track index from path
@@ -209,7 +245,7 @@ class LOMInterface {
         const track = this._getSelectedTrack();
         if (!track) return;
 
-        const api = new LiveAPI("live_set");
+        const api = this._getLiveSetApi();
         const trackPath = track.path;
 
         // Extract track index from path
@@ -228,15 +264,21 @@ class LOMInterface {
     // ============================================================================
 
     navNextTrack() {
-        const api = new LiveAPI("live_set view");
-        const currentTrack = new LiveAPI("live_set view selected_track");
-        const liveSet = new LiveAPI("live_set");
+        const api = this._getViewApi();
+        const liveSet = this._getLiveSetApi();
 
         // Get all tracks
         const tracks = liveSet.get("tracks");
         const trackCount = tracks.length / 2; // tracks is [id, id, ...]
 
-        // Get current track index
+        // Bounds check: no tracks to navigate
+        if (trackCount === 0) {
+            post("Navigation: No tracks in set\n");
+            return;
+        }
+
+        // Get current track index (need fresh API for dynamic path)
+        const currentTrack = new LiveAPI("live_set view selected_track");
         const trackPath = currentTrack.path;
         const match = trackPath.match(/tracks\s+(\d+)/);
 
@@ -249,10 +291,10 @@ class LOMInterface {
     }
 
     navPrevTrack() {
-        const api = new LiveAPI("live_set view");
-        const currentTrack = new LiveAPI("live_set view selected_track");
+        const api = this._getViewApi();
 
-        // Get current track index
+        // Get current track index (need fresh API for dynamic path)
+        const currentTrack = new LiveAPI("live_set view selected_track");
         const trackPath = currentTrack.path;
         const match = trackPath.match(/tracks\s+(\d+)/);
 
@@ -265,59 +307,77 @@ class LOMInterface {
     }
 
     navNextDevice() {
+        // Need fresh API for dynamic selected_track path
         const track = new LiveAPI("live_set view selected_track");
         if (!track.id || track.id == 0) {
             post("Navigation: No track selected\n");
             return;
         }
 
-        const currentDevice = new LiveAPI("live_set view selected_track view selected_device");
         const devices = track.get("devices");
         const deviceCount = devices.length / 2;
 
+        // Bounds check: no devices to navigate
         if (deviceCount === 0) {
             post("Navigation: No devices on track\n");
             return;
         }
 
         // Get current device index
+        const currentDevice = new LiveAPI("live_set view selected_track view selected_device");
         const devicePath = currentDevice.path;
         const match = devicePath.match(/devices\s+(\d+)/);
         const currentIndex = match ? parseInt(match[1]) : -1;
         const nextIndex = Math.min(currentIndex + 1, deviceCount - 1);
 
-        const view = new LiveAPI("live_set view");
+        const view = this._getViewApi();
         view.set("select_device", `live_set view selected_track devices ${nextIndex}`);
         post(`Navigation: Selected device ${nextIndex}\n`);
     }
 
     navPrevDevice() {
+        // Need fresh API for dynamic selected_track path
         const track = new LiveAPI("live_set view selected_track");
         if (!track.id || track.id == 0) {
             post("Navigation: No track selected\n");
             return;
         }
 
-        const currentDevice = new LiveAPI("live_set view selected_track view selected_device");
+        const devices = track.get("devices");
+        const deviceCount = devices.length / 2;
+
+        // Bounds check: no devices to navigate
+        if (deviceCount === 0) {
+            post("Navigation: No devices on track\n");
+            return;
+        }
 
         // Get current device index
+        const currentDevice = new LiveAPI("live_set view selected_track view selected_device");
         const devicePath = currentDevice.path;
         const match = devicePath.match(/devices\s+(\d+)/);
         const currentIndex = match ? parseInt(match[1]) : 0;
         const prevIndex = Math.max(currentIndex - 1, 0);
 
-        const view = new LiveAPI("live_set view");
+        const view = this._getViewApi();
         view.set("select_device", `live_set view selected_track devices ${prevIndex}`);
         post(`Navigation: Selected device ${prevIndex}\n`);
     }
 
     navNextScene() {
-        const api = new LiveAPI("live_set view");
-        const liveSet = new LiveAPI("live_set");
+        const api = this._getViewApi();
+        const liveSet = this._getLiveSetApi();
 
         const scenes = liveSet.get("scenes");
         const sceneCount = scenes.length / 2;
 
+        // Bounds check: no scenes to navigate
+        if (sceneCount === 0) {
+            post("Navigation: No scenes in set\n");
+            return;
+        }
+
+        // Get current scene index (need fresh API for dynamic path)
         const currentScene = new LiveAPI("live_set view selected_scene");
         const scenePath = currentScene.path;
         const match = scenePath.match(/scenes\s+(\d+)/);
@@ -331,7 +391,9 @@ class LOMInterface {
     }
 
     navPrevScene() {
-        const api = new LiveAPI("live_set view");
+        const api = this._getViewApi();
+
+        // Get current scene index (need fresh API for dynamic path)
         const currentScene = new LiveAPI("live_set view selected_scene");
         const scenePath = currentScene.path;
         const match = scenePath.match(/scenes\s+(\d+)/);
@@ -345,7 +407,7 @@ class LOMInterface {
     }
 
     navFocusBrowser() {
-        const api = new LiveAPI("live_set view");
+        const api = this._getViewApi();
         api.set("browse_mode", 1);
         post("Navigation: Browser focused\n");
     }
@@ -359,11 +421,14 @@ class LOMInterface {
      * @returns {Object} Context object
      */
     getCurrentContext() {
+        // Dynamic paths need fresh API objects
         const track = new LiveAPI("live_set view selected_track");
         const device = new LiveAPI("live_set view selected_track view selected_device");
         const clip = new LiveAPI("live_set view highlighted_clip_slot");
-        const liveSet = new LiveAPI("live_set");
-        const view = new LiveAPI("live_set view");
+
+        // Static paths use cached API
+        const liveSet = this._getLiveSetApi();
+        const view = this._getViewApi();
 
         return {
             hasSelectedTrack: track.id && track.id != 0,
