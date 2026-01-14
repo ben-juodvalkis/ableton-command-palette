@@ -108,6 +108,6 @@ Recommended priorities for Phase 1:
 
 ## References
 
-- [PROTOTYPE_SPEC.md](../PROTOTYPE_SPEC.md) — Original 6-hour prototype plan
+- [PROTOTYPE_SPEC.md](../../prototype/PROTOTYPE_SPEC.md) — Original 6-hour prototype plan
 - [IMPLEMENTATION_PLAN.md](../IMPLEMENTATION_PLAN.md) — Full 10-week roadmap
 - [prototype/](../../prototype/) — Working prototype files
