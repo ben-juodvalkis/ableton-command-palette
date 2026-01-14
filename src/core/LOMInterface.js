@@ -493,17 +493,17 @@ class LOMInterface {
 
     /**
      * Add a device to the selected track
-     * Uses Live 12's create_device method with browser item references
-     * @param {string} deviceName - Name of the device to add
+     * Uses Live's insert_device method - device name must match browser name exactly
+     * Note: Only native Live devices are supported, not Max for Live or plug-ins
+     * @param {string} deviceName - Name of the device as it appears in the browser
      */
     deviceAdd(deviceName) {
         const track = this._getSelectedTrack();
         if (!track) return;
 
         try {
-            // Live 12 uses create_device with browser item path
-            // Format varies by device type - try common paths
-            track.call("create_device", deviceName);
+            // insert_device(name, index) - omit index to insert at end
+            track.call("insert_device", deviceName);
             post(`Device: Added ${deviceName}\n`);
         } catch (e) {
             post(`Device: Could not add ${deviceName} - ${e.message}\n`);
