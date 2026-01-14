@@ -14,12 +14,15 @@ inlets = 1;
 outlets = 1;
 
 /**
- * Receives screen width and height, outputs window setup message
- * Input: screenWidth screenHeight (from screensize object)
+ * Receives screen bounds, outputs window setup message
+ * Input: left top right bottom (from screensize object)
  */
-function list(screenWidth, screenHeight) {
-    const left = Math.round((screenWidth - PALETTE_WIDTH) / 2);
-    const top = Math.round((screenHeight - PALETTE_HEIGHT) / 2);
+function list(screenLeft, screenTop, screenRight, screenBottom) {
+    const screenWidth = screenRight - screenLeft;
+    const screenHeight = screenBottom - screenTop;
+
+    const left = screenLeft + Math.round((screenWidth - PALETTE_WIDTH) / 2);
+    const top = screenTop + Math.round((screenHeight - PALETTE_HEIGHT) / 2);
     const right = left + PALETTE_WIDTH;
     const bottom = top + PALETTE_HEIGHT;
 
@@ -30,6 +33,11 @@ function list(screenWidth, screenHeight) {
     outlet(0, "window", "flags", "nozoom");
     outlet(0, "window", "flags", "nogrow");
     outlet(0, "window", "flags", "noclose");
+    outlet(0, "window", "flags", "nominimize");
+    outlet(0, "window", "flags", "nomenu");
+    outlet(0, "toolbarvisible", 0);
+    outlet(0, "statusbarvisible", 0);
+    outlet(0, "presentation", 1);
     outlet(0, "window", "exec");
 }
 
@@ -37,7 +45,7 @@ function list(screenWidth, screenHeight) {
  * Bang triggers output with default screen size (fallback)
  */
 function bang() {
-    list(1920, 1080);
+    list(0, 0, 1920, 1080);
 }
 
 function loadbang() {

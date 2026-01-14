@@ -50,7 +50,7 @@ const CONFIG = {
 // ============================================================================
 
 let displayState = {
-    visible: false,
+    visible: true,  // Always visible when window is open
     query: "",
     selected: 0,
     commands: [],  // Array of {title, category}
@@ -91,19 +91,16 @@ function bang() {
 // ============================================================================
 
 function paint() {
-    const width = this.box.rect[2] - this.box.rect[0];
-    const height = this.box.rect[3] - this.box.rect[1];
+    const pres = this.box.getattr("presentation_rect");
+    const width = pres ? pres[2] : 500;
+    const height = pres ? pres[3] : 400;
 
     // Clear background
     setColor(CONFIG.colors.background);
     mgraphics.rectangle(0, 0, width, height);
     mgraphics.fill();
 
-    if (!displayState.visible) {
-        drawClosedState(width, height);
-        return;
-    }
-
+    // Always draw palette - window visibility handled by pcontrol
     drawPalette(width, height);
 }
 
