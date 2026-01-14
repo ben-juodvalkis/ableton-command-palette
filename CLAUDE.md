@@ -12,17 +12,24 @@ Ableton Live Command Palette - A VS Code-inspired command palette for Ableton Li
 
 ```
 ableton-command-palette/
+├── COMMANDS.md              # Central command reference (keep updated!)
 ├── documentation/
-│   ├── PROTOTYPE_SPEC.md    # 6-hour prototype spec (10 commands)
-│   └── IMPLEMENTATION_PLAN.md # Full 10-week implementation plan
-├── prototype/               # (to be created)
+│   ├── PROTOTYPE_SPEC.md    # 6-hour prototype spec
+│   ├── IMPLEMENTATION_PLAN.md # Full 4-phase roadmap
+│   └── adr/                 # Architecture Decision Records
+├── prototype/               # Completed proof-of-concept (10 commands)
 │   ├── CommandPaletteProto.amxd
 │   └── proto.js
-└── src/                     # (future full implementation)
-    ├── CommandPalette.amxd
-    ├── js/
-    └── commands/
+└── src/                     # Full implementation (v8 architecture)
+    ├── main.js              # v8 entry point (CommonJS)
+    ├── core/                # CommandRegistry, FuzzyMatcher, LOMInterface
+    ├── ui/palette.js        # v8ui rendering
+    └── commands/*.json      # Command definitions
 ```
+
+## Maintenance Notes
+
+- **COMMANDS.md** - When implementing new commands, update this file to mark them as complete `[x]`
 
 ## Key Technologies
 
