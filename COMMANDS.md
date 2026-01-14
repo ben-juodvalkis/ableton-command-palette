@@ -6,7 +6,7 @@ Complete list of commands for the Ableton Command Palette.
 - [x] Implemented
 - [ ] Planned
 
-**Current Status:** 25 implemented / 195 total planned
+**Current Status:** 74 implemented / 195 total planned
 
 ---
 
@@ -81,75 +81,73 @@ Complete list of commands for the Ableton Command Palette.
 
 ## Device (35 total)
 
-### Planned (Phase 2)
+### Implemented (Phase 2)
 
 **Audio Effects:**
-- [ ] **Add Compressor** - Insert Compressor on selected track
-- [ ] **Add EQ Eight** - Insert EQ Eight on selected track
-- [ ] **Add Reverb** - Insert Reverb on selected track
-- [ ] **Add Delay** - Insert Delay on selected track
-- [ ] **Add Auto Filter** - Insert Auto Filter on selected track
-- [ ] **Add Saturator** - Insert Saturator on selected track
-- [ ] **Add Limiter** - Insert Limiter on selected track
-- [ ] **Add Gate** - Insert Gate on selected track
-- [ ] **Add Chorus** - Insert Chorus on selected track
-- [ ] **Add Phaser** - Insert Phaser on selected track
-- [ ] **Add Utility** - Insert Utility on selected track
-- [ ] **Add Spectrum** - Insert Spectrum analyzer on selected track
-- [ ] **Add Tuner** - Insert Tuner on selected track
+- [x] **Add Compressor** - Insert Compressor on selected track
+- [x] **Add EQ Eight** - Insert EQ Eight on selected track
+- [x] **Add Reverb** - Insert Reverb on selected track
+- [x] **Add Delay** - Insert Delay on selected track
+- [x] **Add Auto Filter** - Insert Auto Filter on selected track
+- [x] **Add Saturator** - Insert Saturator on selected track
+- [x] **Add Limiter** - Insert Limiter on selected track
+- [x] **Add Gate** - Insert Gate on selected track
+- [x] **Add Chorus** - Insert Chorus on selected track
+- [x] **Add Phaser** - Insert Phaser on selected track
+- [x] **Add Utility** - Insert Utility on selected track
+- [x] **Add Spectrum** - Insert Spectrum analyzer on selected track
+- [x] **Add Tuner** - Insert Tuner on selected track
 
 **MIDI Effects:**
-- [ ] **Add Arpeggiator** - Insert Arpeggiator on selected track
-- [ ] **Add Chord** - Insert Chord device on selected track
-- [ ] **Add Scale** - Insert Scale device on selected track
-- [ ] **Add Note Length** - Insert Note Length device on selected track
+- [x] **Add Arpeggiator** - Insert Arpeggiator on selected track
+- [x] **Add Chord** - Insert Chord device on selected track
+- [x] **Add Scale** - Insert Scale device on selected track
+- [x] **Add Note Length** - Insert Note Length device on selected track
 
 **Instruments:**
-- [ ] **Add Wavetable** - Insert Wavetable on selected track
-- [ ] **Add Operator** - Insert Operator on selected track
-- [ ] **Add Drift** - Insert Drift on selected track
-- [ ] **Add Simpler** - Insert Simpler on selected track
+- [x] **Add Wavetable** - Insert Wavetable on selected track
+- [x] **Add Operator** - Insert Operator on selected track
+- [x] **Add Drift** - Insert Drift on selected track
+- [x] **Add Simpler** - Insert Simpler on selected track
 
 **Device Operations:**
-- [ ] **Bypass Selected Device** - Bypass the selected device
-- [ ] **Enable Selected Device** - Enable the selected device
-- [ ] **Delete Selected Device** - Delete the selected device
-- [ ] **Duplicate Selected Device** - Duplicate the selected device
+- [x] **Bypass Selected Device** - Toggle bypass on selected device
+- [x] **Delete Selected Device** - Delete the selected device
+- [x] **Duplicate Selected Device** - Duplicate the selected device
 
 ### Planned (Phase 3)
-- [ ] **Collapse Selected Device** - Collapse device view
-- [ ] **Expand Selected Device** - Expand device view
-- [ ] **Show Device Chain** - Show device chain
-- [ ] **Hide Device Chain** - Hide device chain
 - [ ] **Move Device Left** - Move device left in chain
 - [ ] **Move Device Right** - Move device right in chain
 - [ ] **Copy Device** - Copy selected device
 - [ ] **Paste Device** - Paste copied device
 - [ ] **Reset Device** - Reset device to default
 - [ ] **Hot-Swap Device** - Enable hot-swap for device
+- [ ] **Show/Hide Selected Device** - Toggle device visibility (requires UI scripting)
 
 ---
 
 ## Clip (25 total)
 
-### Planned (Phase 2)
-- [ ] **Fire Selected Clip** - Fire the selected clip
-- [ ] **Stop Selected Clip** - Stop the selected clip
-- [ ] **Delete Selected Clip** - Delete the selected clip
-- [ ] **Duplicate Selected Clip** - Duplicate the selected clip
-- [ ] **Quantize Clip 1/4** - Quantize clip to quarter notes
-- [ ] **Quantize Clip 1/8** - Quantize clip to eighth notes
-- [ ] **Quantize Clip 1/16** - Quantize clip to sixteenth notes
-- [ ] **Loop Selection** - Set loop to selection
-- [ ] **Consolidate** - Consolidate selected clips
-- [ ] **Double Loop Length** - Double the loop length
-- [ ] **Halve Loop Length** - Halve the loop length
-- [ ] **Crop Clip** - Crop clip to loop
-- [ ] **Reverse Clip** - Reverse the clip
-- [ ] **Rename Clip** - Rename the selected clip
-- [ ] **Set Clip Color** - Set clip color
+### Implemented (Phase 2)
+- [x] **Fire Selected Clip** - Fire the selected clip
+- [x] **Stop Selected Clip** - Stop the selected clip
+- [x] **Delete Selected Clip** - Delete the selected clip
+- [x] **Duplicate Selected Clip** - Duplicate the selected clip
+- [x] **Quantize Clip 1/4** - Quantize clip to quarter notes
+- [x] **Quantize Clip 1/8** - Quantize clip to eighth notes
+- [x] **Quantize Clip 1/16** - Quantize clip to sixteenth notes
+- [x] **Loop Selection** - Set loop to selection
+- [x] **Consolidate** - Consolidate selected clips
+- [x] **Double Loop Length** - Double the loop length
+- [x] **Halve Loop Length** - Halve the loop length
+- [x] **Crop Clip to Loop** - Crop clip to loop region
+- [x] **Enable Clip Loop** - Enable looping for clip
+- [x] **Disable Clip Loop** - Disable looping for clip
+- [x] **Rename Clip** - Rename the selected clip (placeholder)
 
 ### Planned (Phase 3)
+- [ ] **Set Clip Color** - Set clip color
+- [ ] **Reverse Clip** - Reverse the clip
 - [ ] **Insert MIDI Clip** - Insert empty MIDI clip
 - [ ] **Insert Audio Clip** - Insert audio clip from browser
 - [ ] **Convert to Arrangement** - Move clip to arrangement
@@ -157,30 +155,28 @@ Complete list of commands for the Ableton Command Palette.
 - [ ] **Set Clip Start** - Set clip start marker
 - [ ] **Set Clip End** - Set clip end marker
 - [ ] **Select All Notes** - Select all notes in clip
-- [ ] **Delete All Notes** - Delete all notes in clip
 - [ ] **Transpose Up** - Transpose notes up
-- [ ] **Transpose Down** - Transpose notes down
 
 ---
 
 ## Scene (15 total)
 
-### Planned (Phase 2)
-- [ ] **Fire Selected Scene** - Fire the selected scene
-- [ ] **Fire Next Scene** - Fire the next scene
-- [ ] **Fire Previous Scene** - Fire the previous scene
-- [ ] **Stop All Clips** - Stop all playing clips
-- [ ] **Create Scene** - Create a new scene
-- [ ] **Delete Scene** - Delete the selected scene
-- [ ] **Duplicate Scene** - Duplicate the selected scene
-- [ ] **Capture and Insert Scene** - Capture current state as new scene
-- [ ] **Rename Scene** - Rename the selected scene
-- [ ] **Set Scene Color** - Set scene color
+### Implemented (Phase 2)
+- [x] **Fire Selected Scene** - Fire the selected scene
+- [x] **Fire Next Scene** - Fire the next scene
+- [x] **Fire Previous Scene** - Fire the previous scene
+- [x] **Stop All Clips** - Stop all playing clips
+- [x] **Create Scene** - Create a new scene
+- [x] **Delete Scene** - Delete the selected scene
+- [x] **Duplicate Scene** - Duplicate the selected scene
+- [x] **Capture and Insert Scene** - Capture current state as new scene
+- [x] **Rename Scene** - Rename the selected scene (placeholder)
+- [x] **Set Scene Tempo** - Set scene-specific tempo (placeholder)
 
 ### Planned (Phase 3)
+- [ ] **Set Scene Color** - Set scene color
 - [ ] **Move Scene Up** - Move scene up
 - [ ] **Move Scene Down** - Move scene down
-- [ ] **Set Scene Tempo** - Set scene-specific tempo
 - [ ] **Set Scene Time Signature** - Set scene time signature
 - [ ] **Select All Scenes** - Select all scenes
 
@@ -287,19 +283,19 @@ Complete list of commands for the Ableton Command Palette.
 
 ## Summary by Phase
 
-| Category   | Phase 1 | Phase 2 | Phase 3 | Total |
-|------------|---------|---------|---------|-------|
-| Transport  | 8       | 0       | 5       | 13    |
-| Track      | 10      | 0       | 10      | 20    |
-| Navigation | 7       | 0       | 5       | 12    |
-| Device     | 0       | 25      | 10      | 35    |
-| Clip       | 0       | 15      | 10      | 25    |
-| Scene      | 0       | 10      | 5       | 15    |
-| Mixing     | 0       | 0       | 20      | 20    |
-| View       | 0       | 0       | 15      | 15    |
-| Creation   | 0       | 0       | 20      | 20    |
-| Bulk       | 0       | 0       | 20      | 20    |
-| **Total**  | **25**  | **50**  | **120** | **195** |
+| Category   | Phase 1 | Phase 2 | Phase 3 | Total | Implemented |
+|------------|---------|---------|---------|-------|-------------|
+| Transport  | 8       | 0       | 5       | 13    | 8           |
+| Track      | 10      | 0       | 10      | 20    | 10          |
+| Navigation | 7       | 0       | 5       | 12    | 7           |
+| Device     | 0       | 24      | 11      | 35    | 24          |
+| Clip       | 0       | 15      | 10      | 25    | 15          |
+| Scene      | 0       | 10      | 5       | 15    | 10          |
+| Mixing     | 0       | 0       | 20      | 20    | 0           |
+| View       | 0       | 0       | 15      | 15    | 0           |
+| Creation   | 0       | 0       | 20      | 20    | 0           |
+| Bulk       | 0       | 0       | 20      | 20    | 0           |
+| **Total**  | **25**  | **49**  | **121** | **195** | **74**    |
 
 ---
 

@@ -722,6 +722,64 @@ No separate `textedit` object needed. The `key` object routes all keypresses to 
 2. Consider Tab key for autocomplete (keycode 9)
 3. Begin Phase 2: context-aware filtering and 50 additional commands
 
+### 2026-01-13 (Phase 2)
+
+**Status:** Phase 2 Complete - Context Filtering & 50 New Commands
+
+Implemented context-aware filtering and expanded command library to 75 total commands.
+
+**Context Filtering System (`src/main.js`):**
+- Added `filterByContext()` function that filters commands based on Live state
+- Added `refreshContext()` function called when palette opens
+- Context checks: `selectedTrack`, `selectedDevice`, `selectedClip`, `isPlaying`, `stopped`, `sessionView`, `arrangementView`
+- Commands with `requires` property are hidden when requirements aren't met
+
+**New Command Files Created:**
+- `src/commands/devices.json` - 25 device commands
+- `src/commands/clips.json` - 15 clip commands
+- `src/commands/scenes.json` - 10 scene commands
+
+**Device Commands (25):**
+- Add Effects: Compressor, EQ Eight, Reverb, Delay, Auto Filter, Saturator, Limiter, Gate, Chorus, Phaser, Utility, Spectrum, Tuner
+- Add MIDI Effects: Arpeggiator, Chord, Scale, Note Length
+- Add Instruments: Wavetable, Operator, Drift, Simpler
+- Device Operations: Bypass, Delete, Duplicate, Show/Hide
+
+**Clip Commands (15):**
+- Fire, Stop, Delete, Duplicate Selected Clip
+- Quantize (1/4, 1/8, 1/16)
+- Loop Selection, Consolidate
+- Double/Halve Loop Length
+- Enable/Disable Clip Loop
+- Crop to Loop, Rename
+
+**Scene Commands (10):**
+- Fire Selected/Next/Previous Scene
+- Stop All Clips
+- Create, Delete, Duplicate Scene
+- Capture and Insert Scene
+- Rename, Set Tempo
+
+**LOMInterface.js Additions:**
+- `_getSelectedDevice()` - Get selected device API
+- `_getSelectedClipSlot()` - Get selected clip slot and clip
+- `_getSelectedScene()` - Get selected scene API
+- `deviceAdd(name)` - Add device by name via `create_device`
+- `deviceBypass()`, `deviceDelete()`, `deviceDuplicate()`, `deviceShowHide()`
+- Full clip operations: fire, stop, delete, duplicate, quantize, loop manipulation
+- Full scene operations: fire, create, delete, duplicate, capture
+
+**Command Count:**
+- Phase 1: 25 commands (Transport: 8, Track: 10, Navigation: 7)
+- Phase 2: +50 commands (Device: 25, Clip: 15, Scene: 10)
+- Total: 75 commands
+
+**Next Steps:**
+1. Test all 75 commands in Ableton Live
+2. Verify context filtering works correctly
+3. Test device insertion API with various device types
+4. Begin Phase 3: Parameterized commands, track name matching, recent commands
+
 ---
 
 *Last Updated: 2026-01-13*

@@ -18,6 +18,7 @@ let paletteVisible = false;
 let searchQuery = "";
 let selectedIndex = 0;
 let filteredCommands = [];
+let currentContext = null;
 
 // Core modules
 const registry = new CommandRegistry();
@@ -47,14 +48,15 @@ function loadCommands() {
     // For now, we'll use a static approach with inline loading
 
     try {
-        // Transport commands
+        // Phase 1 commands
         registry.loadFromJSON('transport', transportCommands);
-
-        // Track commands
         registry.loadFromJSON('tracks', trackCommands);
-
-        // Navigation commands
         registry.loadFromJSON('navigation', navigationCommands);
+
+        // Phase 2 commands
+        registry.loadFromJSON('devices', deviceCommands);
+        registry.loadFromJSON('clips', clipCommands);
+        registry.loadFromJSON('scenes', sceneCommands);
 
     } catch (e) {
         post(`Error loading commands: ${e.message}\n`);
@@ -105,7 +107,11 @@ function openPalette() {
     paletteVisible = true;
     searchQuery = "";
     selectedIndex = 0;
-    filteredCommands = registry.getAll();
+
+    // Refresh context and filter commands
+    refreshContext();
+    filteredCommands = filterByContext(registry.getAll(), currentContext);
+
     redraw();
     post("Palette opened\n");
 }
@@ -128,6 +134,49 @@ function togglePalette() {
 }
 
 // ============================================================================
+// CONTEXT FILTERING
+// ============================================================================
+
+/**
+ * Filter commands based on current Live context.
+ * Commands with `requires` properties are hidden when requirements aren't met.
+ *
+ * @param {Array} commands - Commands to filter
+ * @param {Object} context - Current context from lom.getCurrentContext()
+ * @returns {Array} Filtered commands
+ */
+function filterByContext(commands, context) {
+    if (!context) return commands;
+
+    return commands.filter(cmd => {
+        if (!cmd.requires) return true;
+
+        // Check each requirement
+        if (cmd.requires.selectedTrack && !context.hasSelectedTrack) return false;
+        if (cmd.requires.selectedDevice && !context.hasSelectedDevice) return false;
+        if (cmd.requires.selectedClip && !context.hasSelectedClip) return false;
+        if (cmd.requires.playing && !context.isPlaying) return false;
+        if (cmd.requires.stopped && context.isPlaying) return false;
+        if (cmd.requires.sessionView && context.viewMode !== "session") return false;
+        if (cmd.requires.arrangementView && context.viewMode !== "arrangement") return false;
+
+        return true;
+    });
+}
+
+/**
+ * Refresh current context from Live
+ */
+function refreshContext() {
+    try {
+        currentContext = lom.getCurrentContext();
+    } catch (e) {
+        post(`Error getting context: ${e.message}\n`);
+        currentContext = null;
+    }
+}
+
+// ============================================================================
 // SEARCH
 // ============================================================================
 
@@ -135,11 +184,14 @@ function search(query) {
     query = query.toLowerCase().trim();
     searchQuery = query;
 
+    // Get context-filtered commands
+    const availableCommands = filterByContext(registry.getAll(), currentContext);
+
     if (query === "") {
-        filteredCommands = registry.getAll();
+        filteredCommands = availableCommands;
     } else {
         // Use fuzzy matcher to search
-        const results = matcher.search(query, registry.getAll());
+        const results = matcher.search(query, availableCommands);
         filteredCommands = results.map(r => r.command);
     }
 
@@ -467,5 +519,458 @@ const navigationCommands = [
         keywords: ["sidebar", "files", "search"],
         description: "Focus the browser panel",
         action: "nav.focusBrowser"
+    }
+];
+
+// ============================================================================
+// PHASE 2 COMMAND DEFINITIONS
+// ============================================================================
+
+const deviceCommands = [
+    {
+        id: "device.addCompressor",
+        title: "Add Compressor",
+        category: "Device",
+        keywords: ["dynamics", "compress", "effect", "insert"],
+        description: "Add Compressor to selected track",
+        action: "device.addCompressor",
+        requires: { selectedTrack: true }
+    },
+    {
+        id: "device.addEqEight",
+        title: "Add EQ Eight",
+        category: "Device",
+        keywords: ["equalizer", "eq", "frequency", "effect", "insert"],
+        description: "Add EQ Eight to selected track",
+        action: "device.addEqEight",
+        requires: { selectedTrack: true }
+    },
+    {
+        id: "device.addReverb",
+        title: "Add Reverb",
+        category: "Device",
+        keywords: ["space", "room", "hall", "effect", "insert"],
+        description: "Add Reverb to selected track",
+        action: "device.addReverb",
+        requires: { selectedTrack: true }
+    },
+    {
+        id: "device.addDelay",
+        title: "Add Delay",
+        category: "Device",
+        keywords: ["echo", "repeat", "effect", "insert"],
+        description: "Add Delay to selected track",
+        action: "device.addDelay",
+        requires: { selectedTrack: true }
+    },
+    {
+        id: "device.addAutoFilter",
+        title: "Add Auto Filter",
+        category: "Device",
+        keywords: ["filter", "sweep", "lfo", "effect", "insert"],
+        description: "Add Auto Filter to selected track",
+        action: "device.addAutoFilter",
+        requires: { selectedTrack: true }
+    },
+    {
+        id: "device.addSaturator",
+        title: "Add Saturator",
+        category: "Device",
+        keywords: ["distortion", "warmth", "drive", "effect", "insert"],
+        description: "Add Saturator to selected track",
+        action: "device.addSaturator",
+        requires: { selectedTrack: true }
+    },
+    {
+        id: "device.addLimiter",
+        title: "Add Limiter",
+        category: "Device",
+        keywords: ["dynamics", "loud", "ceiling", "effect", "insert"],
+        description: "Add Limiter to selected track",
+        action: "device.addLimiter",
+        requires: { selectedTrack: true }
+    },
+    {
+        id: "device.addGate",
+        title: "Add Gate",
+        category: "Device",
+        keywords: ["dynamics", "noise", "threshold", "effect", "insert"],
+        description: "Add Gate to selected track",
+        action: "device.addGate",
+        requires: { selectedTrack: true }
+    },
+    {
+        id: "device.addChorus",
+        title: "Add Chorus",
+        category: "Device",
+        keywords: ["modulation", "double", "thick", "effect", "insert"],
+        description: "Add Chorus to selected track",
+        action: "device.addChorus",
+        requires: { selectedTrack: true }
+    },
+    {
+        id: "device.addPhaser",
+        title: "Add Phaser",
+        category: "Device",
+        keywords: ["modulation", "sweep", "effect", "insert"],
+        description: "Add Phaser to selected track",
+        action: "device.addPhaser",
+        requires: { selectedTrack: true }
+    },
+    {
+        id: "device.addUtility",
+        title: "Add Utility",
+        category: "Device",
+        keywords: ["gain", "pan", "phase", "width", "effect", "insert"],
+        description: "Add Utility to selected track",
+        action: "device.addUtility",
+        requires: { selectedTrack: true }
+    },
+    {
+        id: "device.addSpectrum",
+        title: "Add Spectrum",
+        category: "Device",
+        keywords: ["analyzer", "frequency", "visual", "meter", "insert"],
+        description: "Add Spectrum analyzer to selected track",
+        action: "device.addSpectrum",
+        requires: { selectedTrack: true }
+    },
+    {
+        id: "device.addTuner",
+        title: "Add Tuner",
+        category: "Device",
+        keywords: ["pitch", "tune", "guitar", "insert"],
+        description: "Add Tuner to selected track",
+        action: "device.addTuner",
+        requires: { selectedTrack: true }
+    },
+    {
+        id: "device.addArpeggiator",
+        title: "Add Arpeggiator",
+        category: "Device",
+        keywords: ["midi", "arp", "pattern", "sequence", "insert"],
+        description: "Add Arpeggiator MIDI effect to selected track",
+        action: "device.addArpeggiator",
+        requires: { selectedTrack: true }
+    },
+    {
+        id: "device.addChord",
+        title: "Add Chord",
+        category: "Device",
+        keywords: ["midi", "harmony", "notes", "insert"],
+        description: "Add Chord MIDI effect to selected track",
+        action: "device.addChord",
+        requires: { selectedTrack: true }
+    },
+    {
+        id: "device.addScale",
+        title: "Add Scale",
+        category: "Device",
+        keywords: ["midi", "key", "quantize", "notes", "insert"],
+        description: "Add Scale MIDI effect to selected track",
+        action: "device.addScale",
+        requires: { selectedTrack: true }
+    },
+    {
+        id: "device.addNoteLength",
+        title: "Add Note Length",
+        category: "Device",
+        keywords: ["midi", "duration", "gate", "insert"],
+        description: "Add Note Length MIDI effect to selected track",
+        action: "device.addNoteLength",
+        requires: { selectedTrack: true }
+    },
+    {
+        id: "device.addWavetable",
+        title: "Add Wavetable",
+        category: "Device",
+        keywords: ["synth", "instrument", "oscillator", "insert"],
+        description: "Add Wavetable synthesizer to selected track",
+        action: "device.addWavetable",
+        requires: { selectedTrack: true }
+    },
+    {
+        id: "device.addOperator",
+        title: "Add Operator",
+        category: "Device",
+        keywords: ["synth", "instrument", "fm", "insert"],
+        description: "Add Operator synthesizer to selected track",
+        action: "device.addOperator",
+        requires: { selectedTrack: true }
+    },
+    {
+        id: "device.addDrift",
+        title: "Add Drift",
+        category: "Device",
+        keywords: ["synth", "instrument", "analog", "insert"],
+        description: "Add Drift synthesizer to selected track",
+        action: "device.addDrift",
+        requires: { selectedTrack: true }
+    },
+    {
+        id: "device.addSimpler",
+        title: "Add Simpler",
+        category: "Device",
+        keywords: ["sampler", "instrument", "sample", "insert"],
+        description: "Add Simpler sampler to selected track",
+        action: "device.addSimpler",
+        requires: { selectedTrack: true }
+    },
+    {
+        id: "device.bypass",
+        title: "Bypass Selected Device",
+        category: "Device",
+        keywords: ["disable", "off", "toggle", "mute"],
+        description: "Toggle bypass on selected device",
+        action: "device.bypass",
+        requires: { selectedDevice: true }
+    },
+    {
+        id: "device.delete",
+        title: "Delete Selected Device",
+        category: "Device",
+        keywords: ["remove", "delete"],
+        description: "Delete the selected device",
+        action: "device.delete",
+        requires: { selectedDevice: true }
+    },
+    {
+        id: "device.duplicate",
+        title: "Duplicate Selected Device",
+        category: "Device",
+        keywords: ["copy", "clone"],
+        description: "Duplicate the selected device",
+        action: "device.duplicate",
+        requires: { selectedDevice: true }
+    }
+];
+
+const clipCommands = [
+    {
+        id: "clip.fire",
+        title: "Fire Selected Clip",
+        category: "Clip",
+        keywords: ["launch", "play", "trigger", "start"],
+        description: "Fire the selected clip",
+        action: "clip.fire",
+        requires: { selectedClip: true }
+    },
+    {
+        id: "clip.stop",
+        title: "Stop Selected Clip",
+        category: "Clip",
+        keywords: ["halt", "pause"],
+        description: "Stop the selected clip",
+        action: "clip.stop",
+        requires: { selectedClip: true }
+    },
+    {
+        id: "clip.delete",
+        title: "Delete Selected Clip",
+        category: "Clip",
+        keywords: ["remove", "clear"],
+        description: "Delete the selected clip",
+        action: "clip.delete",
+        requires: { selectedClip: true }
+    },
+    {
+        id: "clip.duplicate",
+        title: "Duplicate Selected Clip",
+        category: "Clip",
+        keywords: ["copy", "clone"],
+        description: "Duplicate the selected clip",
+        action: "clip.duplicate",
+        requires: { selectedClip: true }
+    },
+    {
+        id: "clip.quantize14",
+        title: "Quantize Clip 1/4",
+        category: "Clip",
+        keywords: ["snap", "grid", "quarter", "timing"],
+        description: "Quantize clip notes to 1/4 note grid",
+        action: "clip.quantize14",
+        requires: { selectedClip: true }
+    },
+    {
+        id: "clip.quantize18",
+        title: "Quantize Clip 1/8",
+        category: "Clip",
+        keywords: ["snap", "grid", "eighth", "timing"],
+        description: "Quantize clip notes to 1/8 note grid",
+        action: "clip.quantize18",
+        requires: { selectedClip: true }
+    },
+    {
+        id: "clip.quantize116",
+        title: "Quantize Clip 1/16",
+        category: "Clip",
+        keywords: ["snap", "grid", "sixteenth", "timing"],
+        description: "Quantize clip notes to 1/16 note grid",
+        action: "clip.quantize116",
+        requires: { selectedClip: true }
+    },
+    {
+        id: "clip.loopSelection",
+        title: "Loop Selection",
+        category: "Clip",
+        keywords: ["repeat", "cycle", "region"],
+        description: "Set loop to current selection",
+        action: "clip.loopSelection",
+        requires: { selectedClip: true }
+    },
+    {
+        id: "clip.consolidate",
+        title: "Consolidate Clip",
+        category: "Clip",
+        keywords: ["bounce", "merge", "flatten"],
+        description: "Consolidate clip to new audio",
+        action: "clip.consolidate",
+        requires: { selectedClip: true, arrangementView: true }
+    },
+    {
+        id: "clip.doubleLoop",
+        title: "Double Loop Length",
+        category: "Clip",
+        keywords: ["extend", "longer", "2x"],
+        description: "Double the clip loop length",
+        action: "clip.doubleLoop",
+        requires: { selectedClip: true }
+    },
+    {
+        id: "clip.halveLoop",
+        title: "Halve Loop Length",
+        category: "Clip",
+        keywords: ["shorten", "shorter", "half"],
+        description: "Halve the clip loop length",
+        action: "clip.halveLoop",
+        requires: { selectedClip: true }
+    },
+    {
+        id: "clip.setLoopOn",
+        title: "Enable Clip Loop",
+        category: "Clip",
+        keywords: ["repeat", "cycle", "on"],
+        description: "Enable looping for selected clip",
+        action: "clip.setLoopOn",
+        requires: { selectedClip: true }
+    },
+    {
+        id: "clip.setLoopOff",
+        title: "Disable Clip Loop",
+        category: "Clip",
+        keywords: ["oneshot", "once", "off"],
+        description: "Disable looping for selected clip",
+        action: "clip.setLoopOff",
+        requires: { selectedClip: true }
+    },
+    {
+        id: "clip.cropToLoop",
+        title: "Crop Clip to Loop",
+        category: "Clip",
+        keywords: ["trim", "cut", "region"],
+        description: "Crop clip to current loop region",
+        action: "clip.cropToLoop",
+        requires: { selectedClip: true }
+    },
+    {
+        id: "clip.rename",
+        title: "Rename Selected Clip",
+        category: "Clip",
+        keywords: ["name", "label", "title"],
+        description: "Rename the selected clip",
+        action: "clip.rename",
+        requires: { selectedClip: true }
+    }
+];
+
+const sceneCommands = [
+    {
+        id: "scene.fire",
+        title: "Fire Selected Scene",
+        category: "Scene",
+        keywords: ["launch", "play", "trigger", "start"],
+        description: "Fire the selected scene",
+        action: "scene.fire",
+        requires: { sessionView: true }
+    },
+    {
+        id: "scene.fireNext",
+        title: "Fire Next Scene",
+        category: "Scene",
+        keywords: ["launch", "play", "trigger", "forward", "down"],
+        description: "Fire the next scene",
+        action: "scene.fireNext",
+        requires: { sessionView: true }
+    },
+    {
+        id: "scene.firePrev",
+        title: "Fire Previous Scene",
+        category: "Scene",
+        keywords: ["launch", "play", "trigger", "back", "up"],
+        description: "Fire the previous scene",
+        action: "scene.firePrev",
+        requires: { sessionView: true }
+    },
+    {
+        id: "scene.stopAll",
+        title: "Stop All Clips",
+        category: "Scene",
+        keywords: ["halt", "silence", "stop"],
+        description: "Stop all playing clips",
+        action: "scene.stopAll"
+    },
+    {
+        id: "scene.create",
+        title: "Create Scene",
+        category: "Scene",
+        keywords: ["new", "add", "insert"],
+        description: "Create a new scene",
+        action: "scene.create",
+        requires: { sessionView: true }
+    },
+    {
+        id: "scene.delete",
+        title: "Delete Selected Scene",
+        category: "Scene",
+        keywords: ["remove", "delete"],
+        description: "Delete the selected scene",
+        action: "scene.delete",
+        requires: { sessionView: true }
+    },
+    {
+        id: "scene.duplicate",
+        title: "Duplicate Selected Scene",
+        category: "Scene",
+        keywords: ["copy", "clone"],
+        description: "Duplicate the selected scene",
+        action: "scene.duplicate",
+        requires: { sessionView: true }
+    },
+    {
+        id: "scene.capture",
+        title: "Capture and Insert Scene",
+        category: "Scene",
+        keywords: ["snapshot", "save", "capture"],
+        description: "Capture currently playing clips into a new scene",
+        action: "scene.capture",
+        requires: { sessionView: true }
+    },
+    {
+        id: "scene.rename",
+        title: "Rename Selected Scene",
+        category: "Scene",
+        keywords: ["name", "label", "title"],
+        description: "Rename the selected scene",
+        action: "scene.rename",
+        requires: { sessionView: true }
+    },
+    {
+        id: "scene.setTempo",
+        title: "Set Scene Tempo",
+        category: "Scene",
+        keywords: ["bpm", "speed", "tempo"],
+        description: "Set tempo for the selected scene",
+        action: "scene.setTempo",
+        requires: { sessionView: true }
     }
 ];
