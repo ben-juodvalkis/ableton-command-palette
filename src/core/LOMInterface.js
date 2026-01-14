@@ -651,7 +651,6 @@ class LOMInterface {
             return;
         }
 
-        // Quantize is only available for MIDI clips
         try {
             result.clip.call("quantize", gridSize, 1.0); // gridSize, strength
             post(`Clip: Quantized to ${gridSize} beats\n`);
