@@ -742,15 +742,6 @@ const deviceCommands = [
         description: "Duplicate the selected device",
         action: "device.duplicate",
         requires: { selectedDevice: true }
-    },
-    {
-        id: "device.showHide",
-        title: "Show/Hide Selected Device",
-        category: "Device",
-        keywords: ["collapse", "expand", "view", "toggle"],
-        description: "Toggle visibility of selected device",
-        action: "device.showHide",
-        requires: { selectedDevice: true }
     }
 ];
 

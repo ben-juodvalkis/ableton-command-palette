@@ -6,7 +6,7 @@ Complete list of commands for the Ableton Command Palette.
 - [x] Implemented
 - [ ] Planned
 
-**Current Status:** 75 implemented / 195 total planned
+**Current Status:** 74 implemented / 195 total planned
 
 ---
 
@@ -114,7 +114,6 @@ Complete list of commands for the Ableton Command Palette.
 - [x] **Bypass Selected Device** - Toggle bypass on selected device
 - [x] **Delete Selected Device** - Delete the selected device
 - [x] **Duplicate Selected Device** - Duplicate the selected device
-- [x] **Show/Hide Selected Device** - Toggle device visibility
 
 ### Planned (Phase 3)
 - [ ] **Move Device Left** - Move device left in chain
@@ -123,6 +122,7 @@ Complete list of commands for the Ableton Command Palette.
 - [ ] **Paste Device** - Paste copied device
 - [ ] **Reset Device** - Reset device to default
 - [ ] **Hot-Swap Device** - Enable hot-swap for device
+- [ ] **Show/Hide Selected Device** - Toggle device visibility (requires UI scripting)
 
 ---
 
@@ -288,14 +288,14 @@ Complete list of commands for the Ableton Command Palette.
 | Transport  | 8       | 0       | 5       | 13    | 8           |
 | Track      | 10      | 0       | 10      | 20    | 10          |
 | Navigation | 7       | 0       | 5       | 12    | 7           |
-| Device     | 0       | 25      | 10      | 35    | 25          |
+| Device     | 0       | 24      | 11      | 35    | 24          |
 | Clip       | 0       | 15      | 10      | 25    | 15          |
 | Scene      | 0       | 10      | 5       | 15    | 10          |
 | Mixing     | 0       | 0       | 20      | 20    | 0           |
 | View       | 0       | 0       | 15      | 15    | 0           |
 | Creation   | 0       | 0       | 20      | 20    | 0           |
 | Bulk       | 0       | 0       | 20      | 20    | 0           |
-| **Total**  | **25**  | **50**  | **120** | **195** | **75**    |
+| **Total**  | **25**  | **49**  | **121** | **195** | **74**    |
 
 ---
 

@@ -83,7 +83,6 @@ class LOMInterface {
             'device.bypass': () => self.deviceBypass(),
             'device.delete': () => self.deviceDelete(),
             'device.duplicate': () => self.deviceDuplicate(),
-            'device.showHide': () => self.deviceShowHide(),
 
             // Clip
             'clip.fire': () => self.clipFire(),
@@ -551,26 +550,19 @@ class LOMInterface {
         const device = this._getSelectedDevice();
         if (!device) return;
 
-        // Copy device to clipboard and paste
-        // Note: This requires the device to be selected in the UI
-        const api = this._getLiveSetApi();
-        api.call("copy_device");
-        api.call("paste_device");
-        post("Device: Duplicated\n");
-    }
+        const track = this._getSelectedTrack();
+        if (!track) return;
 
-    /**
-     * Toggle visibility of selected device (collapse/expand)
-     */
-    deviceShowHide() {
-        const device = this._getSelectedDevice();
-        if (!device) return;
+        const devicePath = device.path;
+        const match = devicePath.match(/devices\s+(\d+)/);
 
-        const current = device.get("view");
-        const collapsed = current && current.get && current.get("is_collapsed");
-        // Note: Device view collapse is not directly accessible via LOM in all cases
-        // This is a placeholder - actual implementation may need UI scripting
-        post("Device: Toggle visibility (limited LOM support)\n");
+        if (match) {
+            const deviceIndex = parseInt(match[1]);
+            track.call("duplicate_device", deviceIndex);
+            post(`Device: Duplicated device at index ${deviceIndex}\n`);
+        } else {
+            post("Device: Could not determine device index\n");
+        }
     }
 
     // ============================================================================
