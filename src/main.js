@@ -69,12 +69,14 @@ function loadCommands() {
 
 function msg_int(val) {
     // Handle key codes from key object
+    post("key int: " + val + "\n");
     keydown(val);
 }
 
 function anything() {
     const cmd = messagename;
     const args = arrayfromargs(arguments);
+    post("anything: " + cmd + " " + args.join(" ") + "\n");
 
     switch (cmd) {
         case "open":
@@ -217,7 +219,7 @@ function search(query) {
  * @param {number} keycode - ASCII key code from Max key object
  */
 function keydown(keycode) {
-    if (!paletteVisible) return;
+    // Window visibility now handled by pcontrol, always process keys
 
     // Navigation and control keys
     switch (keycode) {
