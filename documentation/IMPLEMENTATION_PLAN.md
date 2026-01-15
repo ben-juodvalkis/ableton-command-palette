@@ -780,6 +780,90 @@ Implemented context-aware filtering and expanded command library to 75 total com
 3. Test device insertion API with various device types
 4. Begin Phase 3: Parameterized commands, track name matching, recent commands
 
+### 2026-01-15: Floating Window UI Implementation
+
+**Status:** Floating Window Architecture Complete (with keyboard input limitation)
+
+**Floating Window Architecture:**
+
+Implemented VS Code-style floating palette window using `pcontrol` and `thispatcher`:
+
+**Main Patch (CommandPalette.amxd):**
+- `live.toggle` for MIDI-mappable trigger
+- `sel 1 0` routes to `open`/`close` messages
+- `pcontrol` opens/closes the subpatcher window
+- `r ---close` receives close signal, resets toggle via `set 0`
+
+**Floating Subpatch (p palette_window):**
+- `thispatcher` receives window configuration from `v8 window.js`
+- `v8ui palette.js` renders the palette UI (500x400, presentation mode)
+- `key` object captures keystrokes when window is focused
+- `v8 main.js` handles command logic
+- `s ---close` sends close signal back to main patch
+
+**New File Created:**
+- `src/ui/window.js` - Window positioning and configuration
+  - Receives screen bounds from `screensize` object
+  - Calculates centered window position
+  - Outputs `thispatcher` messages: `window size`, `window notitle`, `window flags float/nozoom/nogrow/noclose/nominimize/nomenu`, `toolbarvisible 0`, `statusbarvisible 0`, `presentation 1`, `window exec`, `active 1`
+
+**Changes to Existing Files:**
+- `src/ui/palette.js`:
+  - Changed `displayState.visible` default to `true` (window visibility now handled by pcontrol)
+  - Removed closed state check in `paint()` - always draws palette
+  - Changed dimension reading to use `this.box.getattr("presentation_rect")` for proper sizing
+- `src/main.js`:
+  - Added logging for key messages (`post("key int: " + val)`, `post("anything: " + cmd)`)
+  - Removed `if (!paletteVisible) return` check in `keydown()` - keys always processed when window open
+
+**Architecture Diagram:**
+```
+Main Patch:
+live.toggle → sel 1 0 → pcontrol → p palette_window
+                  ↑
+r ---close ← set 0
+
+Floating Subpatch:
+loadbang → screensize → v8 window.js → thispatcher
+key → prepend key → v8 main.js → v8ui palette.js
+                         ↓
+                    s ---close
+```
+
+**ADR 003: Keyboard Input in Floating Windows**
+
+**Problem:** The `key` object captures keystrokes, but they also pass through to Ableton Live. This causes unintended actions (e.g., pressing "S" solos a track).
+
+**Root Cause:** Max for Live floating windows are child windows of the Live process. Keystrokes are not exclusively captured - they propagate to the parent application.
+
+**Options Considered:**
+1. **`active 1` message** - Tried sending `active 1` to `thispatcher`. Does not prevent Live passthrough.
+2. **textedit with `@keymode 1`** - A `textedit` object properly captures keyboard focus and prevents passthrough. With `@keymode 1`, it outputs text on every keystroke for real-time search.
+3. **jweb with HTML input** - A web view would capture keyboard exclusively but adds complexity.
+4. **Accept limitation** - Document that users should disable Live keyboard shortcuts while using palette.
+
+**Decision:** TBD - Option 2 (textedit) is recommended as the simplest solution that properly captures keyboard input.
+
+**Proposed textedit Integration:**
+```
+textedit @keymode 1 @autofocus 1
+     │
+     ▼ (outputs text on each keystroke)
+prepend text
+     │
+     ▼
+v8 main.js (search triggered)
+
+key object still handles: Arrow keys, Enter, Escape
+```
+
+**Next Steps:**
+1. Add `textedit @keymode 1` to floating subpatch for text input
+2. Style textedit to match palette theme (or hide and overlay with v8ui rendering)
+3. Route textedit output to main.js for real-time search
+4. Keep `key` object for navigation (arrows, enter, escape)
+5. Test that Live no longer receives keystrokes
+
 ---
 
-*Last Updated: 2026-01-13*
+*Last Updated: 2026-01-15*
