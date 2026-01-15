@@ -17,14 +17,12 @@ const deviceCommands = require('./commands/devices.js');
 const clipCommands = require('./commands/clips.js');
 const sceneCommands = require('./commands/scenes.js');
 
-// Debug: Log module loading
-post("DEBUG: Loaded command modules:\n");
-post("  - transport.js: " + transportCommands.length + " commands\n");
-post("  - tracks.js: " + trackCommands.length + " commands\n");
-post("  - navigation.js: " + navigationCommands.length + " commands\n");
-post("  - devices.js: " + deviceCommands.length + " commands\n");
-post("  - clips.js: " + clipCommands.length + " commands\n");
-post("  - scenes.js: " + sceneCommands.length + " commands\n");
+// Debug mode - set to true for verbose logging
+const DEBUG = false;
+
+function debug(msg) {
+    if (DEBUG) post("[DEBUG] " + msg + "\n");
+}
 
 // Max v8 globals
 inlets = 1;
@@ -75,9 +73,8 @@ function loadCommands() {
         registry.loadFromJSON('clips', clipCommands);
         registry.loadFromJSON('scenes', sceneCommands);
 
-        // Debug: Verify registration
-        post("DEBUG: Registry now contains " + registry.count() + " commands\n");
-        post("DEBUG: Categories: " + registry.getCategories().join(", ") + "\n");
+        debug("Registry now contains " + registry.count() + " commands");
+        debug("Categories: " + registry.getCategories().join(", "));
 
     } catch (e) {
         post(`Error loading commands: ${e.message}\n`);

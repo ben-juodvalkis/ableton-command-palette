@@ -24,8 +24,6 @@ class CommandRegistry {
         for (const cmd of commandList) {
             this.register(cmd);
         }
-
-        post(`Loaded ${commandList.length} commands in category: ${category}\n`);
     }
 
     /**
