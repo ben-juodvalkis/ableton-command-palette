@@ -17,6 +17,10 @@ mgraphics.autofill = 0;
 // ============================================================================
 
 const CONFIG = {
+    // Window dimensions (must match window.js)
+    windowWidth: 500,
+    windowHeight: 400,
+
     // Colors (dark theme matching Ableton)
     colors: {
         background: [0.118, 0.118, 0.118, 1.0],      // #1e1e1e
@@ -92,8 +96,8 @@ function bang() {
 
 function paint() {
     const pres = this.box.getattr("presentation_rect");
-    const width = pres ? pres[2] : 500;
-    const height = pres ? pres[3] : 400;
+    const width = pres ? pres[2] : CONFIG.windowWidth;
+    const height = pres ? pres[3] : CONFIG.windowHeight;
 
     // Clear background
     setColor(CONFIG.colors.background);
@@ -107,20 +111,6 @@ function paint() {
 // ============================================================================
 // DRAWING FUNCTIONS
 // ============================================================================
-
-function drawClosedState(width, height) {
-    setColor(CONFIG.colors.textDim);
-    mgraphics.select_font_face(CONFIG.fontName);
-    mgraphics.set_font_size(CONFIG.smallFontSize);
-
-    const hint = "MIDI map the toggle to open palette";
-    const extents = mgraphics.text_measure(hint);
-    const x = (width - extents[0]) / 2;
-    const y = (height + extents[1]) / 2;
-
-    mgraphics.move_to(x, y);
-    mgraphics.show_text(hint);
-}
 
 function drawPalette(width, height) {
     let y = CONFIG.padding;

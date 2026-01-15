@@ -69,14 +69,12 @@ function loadCommands() {
 
 function msg_int(val) {
     // Handle key codes from key object
-    post("key int: " + val + "\n");
     keydown(val);
 }
 
 function anything() {
     const cmd = messagename;
     const args = arrayfromargs(arguments);
-    post("anything: " + cmd + " " + args.join(" ") + "\n");
 
     switch (cmd) {
         case "open":

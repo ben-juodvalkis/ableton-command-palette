@@ -844,25 +844,39 @@ key → prepend key → v8 main.js → v8ui palette.js
 
 **Decision:** TBD - Option 2 (textedit) is recommended as the simplest solution that properly captures keyboard input.
 
+**textedit Research (corrected understanding):**
+
+Key attributes:
+- `@keymode 1` - Makes **Return key** output buffer contents (NOT real-time output)
+- `@keymode 0` (default) - Return creates line break
+- `@tabmode 1` (default) - Tab outputs buffer contents
+- **Middle outlet** - Outputs ASCII code of each character as typed (real-time!)
+- `@outputmode 0` - Output as messages; `@outputmode 1` - Output as single symbol
+
+Focus control:
+- `select` message - Highlights all text AND sets textedit as keyboard target
+- `enter` message - Outputs text and removes focus
+- No `@autofocus` attribute exists
+
 **Proposed textedit Integration:**
 ```
-textedit @keymode 1 @autofocus 1
-     │
-     ▼ (outputs text on each keystroke)
-prepend text
-     │
-     ▼
-v8 main.js (search triggered)
+On window open:
+r ---open ──► "select" ──► textedit @varname search_input
+                               │
+                               │ middle outlet (ASCII codes in real-time)
+                               ▼
+                          v8 main.js (build search string char by char)
 
-key object still handles: Arrow keys, Enter, Escape
+key object still handles: Arrow keys (30/31 or 38/40), Enter (13), Escape (27)
 ```
 
 **Next Steps:**
-1. Add `textedit @keymode 1` to floating subpatch for text input
-2. Style textedit to match palette theme (or hide and overlay with v8ui rendering)
-3. Route textedit output to main.js for real-time search
-4. Keep `key` object for navigation (arrows, enter, escape)
-5. Test that Live no longer receives keystrokes
+1. Add `textedit` to floating subpatch with scripting name
+2. Send `select` message when window opens to capture keyboard focus
+3. Route middle outlet (ASCII codes) to main.js for character-by-character search
+4. Style textedit to match palette theme or overlay with v8ui rendering
+5. Keep `key` object for navigation keys only
+6. Test that Live no longer receives keystrokes
 
 ---
 
