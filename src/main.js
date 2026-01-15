@@ -104,6 +104,8 @@ function anything() {
             closePalette();
             break;
         case "tog":
+            // togglePalette() handles state; focus only needed when opening
+            // (closePalette() already sends "clear" when closing)
             togglePalette();
             if (paletteVisible) {
                 outlet(0, "focus");
@@ -235,6 +237,19 @@ function search(query) {
 // ============================================================================
 // TEXTEDIT INPUT HANDLING
 // ============================================================================
+//
+// PATCHER WIRING (for reference):
+//
+// textedit (off-screen, captures keyboard focus)
+//   └─ middle outlet → select 13 27 30 31 38 40
+//                        ├─ matched (nav keys) → prepend key → main.js
+//                        └─ unmatched (chars) → prepend char → main.js
+//
+// main.js outlet 0 → route focus clear
+//   ├─ focus → select → textedit (captures keyboard on open)
+//   ├─ clear → set "" → textedit (clears on close)
+//   └─ unmatched (display) → v8ui (rendering)
+//
 
 /**
  * Handle character input from textedit middle outlet.
@@ -242,10 +257,14 @@ function search(query) {
  * This provides real-time search while textedit captures keyboard focus
  * (preventing keypresses from passing through to Ableton Live).
  *
+ * Note: textedit is off-screen; v8ui renders the search query visually.
+ * No sync back to textedit needed since user never sees it.
+ *
  * @param {number} charCode - ASCII code from textedit middle outlet
  */
 function handleTexteditChar(charCode) {
-    // Backspace - remove last character
+    // Backspace (8) or Delete (127 on some systems)
+    // Note: 127 may be forward-delete on certain platforms
     if (charCode === 8 || charCode === 127) {
         if (searchQuery.length > 0) {
             searchQuery = searchQuery.slice(0, -1);
