@@ -39,7 +39,8 @@ function list(screenLeft, screenTop, screenRight, screenBottom) {
     outlet(0, "statusbarvisible", 0);
     outlet(0, "presentation", 1);
     outlet(0, "window", "exec");
-    outlet(0, "active", 1);
+    // Note: "active" is not a valid thispatcher message - window activation
+    // is handled by pcontrol's "open" message
 }
 
 /**

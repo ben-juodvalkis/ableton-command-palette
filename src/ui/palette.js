@@ -155,6 +155,7 @@ function drawSearchInput(x, y, inputWidth) {
     // Query text
     setColor(CONFIG.colors.text);
     mgraphics.select_font_face(CONFIG.fontName);
+    mgraphics.set_font_size(CONFIG.fontSize);
     const queryText = displayState.query || "";
     mgraphics.move_to(x + 30, y + CONFIG.inputHeight / 2 + 5);
     mgraphics.show_text(queryText);
