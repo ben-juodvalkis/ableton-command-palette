@@ -95,25 +95,35 @@ function anything() {
     const args = arrayfromargs(arguments);
 
     switch (cmd) {
-        case "open":
+        case "show":
             openPalette();
+            // Signal to focus textedit
+            outlet(0, "focus");
             break;
-        case "close":
+        case "hide":
             closePalette();
             break;
-        case "toggle":
+        case "tog":
             togglePalette();
+            if (paletteVisible) {
+                outlet(0, "focus");
+            }
             break;
         case "text":
-            // Text input from textedit
+            // Complete text from textedit (on Enter/Tab)
             searchQuery = args.join(" ");
             search(searchQuery);
             break;
+        case "char":
+            // Single character ASCII from textedit middle outlet
+            handleTexteditChar(args[0]);
+            break;
         case "key":
+            // Navigation keys from key object (arrows, escape, enter)
             keydown(args[0]);
             break;
         default:
-            post(`Unknown message: ${cmd}\n`);
+            debug(`Unknown message: ${cmd}`);
     }
 }
 
@@ -138,7 +148,8 @@ function closePalette() {
     paletteVisible = false;
     searchQuery = "";
     selectedIndex = 0;
-    outlet(1, "bang"); // Signal palette closed
+    outlet(0, "clear");  // Clear textedit
+    outlet(1, "bang");   // Signal palette closed (triggers pcontrol close)
     redraw();
     post("Palette closed\n");
 }
@@ -222,59 +233,73 @@ function search(query) {
 }
 
 // ============================================================================
-// KEYBOARD HANDLING
+// TEXTEDIT INPUT HANDLING
 // ============================================================================
 
 /**
- * Handle keyboard input for the palette.
- * Supports:
- * - Navigation: Arrow Up/Down, Enter, Escape
- * - Text input: Printable characters (a-z, 0-9, space, punctuation)
- * - Editing: Backspace/Delete
+ * Handle character input from textedit middle outlet.
+ * The middle outlet sends ASCII codes for each character as typed.
+ * This provides real-time search while textedit captures keyboard focus
+ * (preventing keypresses from passing through to Ableton Live).
  *
- * @param {number} keycode - ASCII key code from Max key object
+ * @param {number} charCode - ASCII code from textedit middle outlet
+ */
+function handleTexteditChar(charCode) {
+    // Backspace - remove last character
+    if (charCode === 8 || charCode === 127) {
+        if (searchQuery.length > 0) {
+            searchQuery = searchQuery.slice(0, -1);
+            search(searchQuery);
+        }
+        return;
+    }
+
+    // Printable characters (ASCII 32-126)
+    if (charCode >= 32 && charCode <= 126) {
+        const char = String.fromCharCode(charCode);
+        searchQuery += char;
+        search(searchQuery);
+    }
+}
+
+// ============================================================================
+// KEYBOARD HANDLING (Navigation Keys Only)
+// ============================================================================
+
+/**
+ * Handle navigation keys from the key object.
+ * With textedit integration, this only handles non-text keys:
+ * - Arrow Up/Down for navigation
+ * - Enter to execute
+ * - Escape to close
+ *
+ * Text input is handled by handleTexteditChar() from textedit middle outlet.
+ *
+ * @param {number} keycode - Key code from Max key object
  */
 function keydown(keycode) {
-    // Window visibility now handled by pcontrol, always process keys
-
-    // Navigation and control keys
+    // Navigation and control keys only
+    // (Text input handled by textedit → handleTexteditChar)
     switch (keycode) {
         case 27: // Escape
             closePalette();
-            return;
+            break;
 
         case 13: // Enter/Return
             executeSelected();
-            return;
+            break;
 
         case 38: // Up Arrow
         case 30: // Max sometimes sends 30 for up
             selectedIndex = Math.max(0, selectedIndex - 1);
             redraw();
-            return;
+            break;
 
         case 40: // Down Arrow
         case 31: // Max sometimes sends 31 for down
             selectedIndex = Math.min(filteredCommands.length - 1, selectedIndex + 1);
             redraw();
-            return;
-
-        case 8:   // Backspace
-        case 127: // Delete (some systems)
-            if (searchQuery.length > 0) {
-                searchQuery = searchQuery.slice(0, -1);
-                search(searchQuery);
-            }
-            return;
-    }
-
-    // Printable characters (ASCII 32-126)
-    // 32 = space, 33-47 = punctuation, 48-57 = digits, 58-64 = punctuation,
-    // 65-90 = uppercase, 91-96 = punctuation, 97-122 = lowercase, 123-126 = punctuation
-    if (keycode >= 32 && keycode <= 126) {
-        const char = String.fromCharCode(keycode);
-        searchQuery += char;
-        search(searchQuery);
+            break;
     }
 }
 
