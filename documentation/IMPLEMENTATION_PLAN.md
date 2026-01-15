@@ -870,13 +870,55 @@ r ---open ──► "select" ──► textedit @varname search_input
 key object still handles: Arrow keys (30/31 or 38/40), Enter (13), Escape (27)
 ```
 
-**Next Steps:**
-1. Add `textedit` to floating subpatch with scripting name
-2. Send `select` message when window opens to capture keyboard focus
-3. Route middle outlet (ASCII codes) to main.js for character-by-character search
-4. Style textedit to match palette theme or overlay with v8ui rendering
-5. Keep `key` object for navigation keys only
-6. Test that Live no longer receives keystrokes
+### 2026-01-15: textedit Keyboard Capture Implementation
+
+**Status:** Complete
+
+**Problem:** Keypresses in the floating palette window were passing through to Ableton Live, causing unintended actions (e.g., pressing "S" while typing would solo a track).
+
+**Solution:** Implemented textedit-based keyboard capture. textedit properly captures keyboard focus and prevents passthrough to Live.
+
+**Architecture:**
+```
+textedit (middle outlet - ASCII codes per keystroke)
+    │
+    ▼
+select 13 27 30 31 38 40
+    │                  │
+    ▼                  ▼
+prepend key       prepend char
+    │                  │
+    └────────┬─────────┘
+             ▼
+        v8 main.js
+```
+
+**Changes to main.js:**
+- Renamed message handlers to avoid reserved words: `open` → `show`, `close` → `hide`, `toggle` → `tog`
+- Added `handleTexteditChar()` function for real-time character input from textedit middle outlet
+- Added `char` message handler routing to `handleTexteditChar()`
+- Simplified `keydown()` to handle only navigation keys (arrows, Enter, Escape)
+- Added `outlet(0, "focus")` on palette open to trigger textedit focus
+- Added `outlet(0, "clear")` on palette close to clear textedit
+
+**Changes to window.js:**
+- Removed invalid `active 1` message to thispatcher
+
+**Max Patcher Setup (p palette_window):**
+1. textedit object (can be off-screen, v8ui handles visual rendering)
+2. Middle outlet → `select 13 27 30 31 38 40` to split nav keys from text
+3. Nav keys (Enter, Escape, arrows) → `prepend key` → main.js
+4. Other characters → `prepend char` → main.js
+5. `route focus clear` on main.js outlet 0:
+   - `focus` → `select` message to textedit (gives keyboard focus)
+   - `clear` → `set ""` to textedit (clears on close)
+   - Unmatched (`display`) → v8ui
+
+**Result:**
+- Keyboard input captured by textedit, no longer passes to Live
+- Real-time search as user types
+- Arrow keys work for navigation while typing
+- Enter executes, Escape closes
 
 ### 2026-01-15: Command Module Refactor (CommonJS)
 
@@ -914,4 +956,4 @@ module.exports = transportCommands;
 
 ---
 
-*Last Updated: 2026-01-15*
+*Last Updated: 2026-01-15 (textedit keyboard capture)*
