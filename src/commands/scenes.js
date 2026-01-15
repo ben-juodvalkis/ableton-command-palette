@@ -1,0 +1,99 @@
+/**
+ * Scene Commands
+ *
+ * Commands for scene manipulation: fire, create, delete, duplicate, etc.
+ */
+
+const sceneCommands = [
+    {
+        id: "scene.fire",
+        title: "Fire Selected Scene",
+        category: "Scene",
+        keywords: ["launch", "play", "trigger", "start"],
+        description: "Fire the selected scene",
+        action: "scene.fire",
+        requires: { sessionView: true }
+    },
+    {
+        id: "scene.fireNext",
+        title: "Fire Next Scene",
+        category: "Scene",
+        keywords: ["launch", "play", "trigger", "forward", "down"],
+        description: "Fire the next scene",
+        action: "scene.fireNext",
+        requires: { sessionView: true }
+    },
+    {
+        id: "scene.firePrev",
+        title: "Fire Previous Scene",
+        category: "Scene",
+        keywords: ["launch", "play", "trigger", "back", "up"],
+        description: "Fire the previous scene",
+        action: "scene.firePrev",
+        requires: { sessionView: true }
+    },
+    {
+        id: "scene.stopAll",
+        title: "Stop All Clips",
+        category: "Scene",
+        keywords: ["halt", "silence", "stop"],
+        description: "Stop all playing clips",
+        action: "scene.stopAll"
+    },
+    {
+        id: "scene.create",
+        title: "Create Scene",
+        category: "Scene",
+        keywords: ["new", "add", "insert"],
+        description: "Create a new scene",
+        action: "scene.create",
+        requires: { sessionView: true }
+    },
+    {
+        id: "scene.delete",
+        title: "Delete Selected Scene",
+        category: "Scene",
+        keywords: ["remove", "delete"],
+        description: "Delete the selected scene",
+        action: "scene.delete",
+        requires: { sessionView: true }
+    },
+    {
+        id: "scene.duplicate",
+        title: "Duplicate Selected Scene",
+        category: "Scene",
+        keywords: ["copy", "clone"],
+        description: "Duplicate the selected scene",
+        action: "scene.duplicate",
+        requires: { sessionView: true }
+    },
+    {
+        id: "scene.capture",
+        title: "Capture and Insert Scene",
+        category: "Scene",
+        keywords: ["snapshot", "save", "capture"],
+        description: "Capture currently playing clips into a new scene",
+        action: "scene.capture",
+        requires: { sessionView: true }
+    },
+    {
+        id: "scene.rename",
+        title: "Rename Selected Scene",
+        category: "Scene",
+        keywords: ["name", "label", "title"],
+        description: "Rename the selected scene",
+        action: "scene.rename",
+        requires: { sessionView: true }
+    },
+    {
+        id: "scene.setTempo",
+        title: "Set Scene Tempo",
+        category: "Scene",
+        keywords: ["bpm", "speed", "tempo"],
+        description: "Set tempo for the selected scene",
+        action: "scene.setTempo",
+        requires: { sessionView: true }
+    }
+];
+
+module.exports = sceneCommands;

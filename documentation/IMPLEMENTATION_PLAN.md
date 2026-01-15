@@ -878,6 +878,40 @@ key object still handles: Arrow keys (30/31 or 38/40), Enter (13), Escape (27)
 5. Keep `key` object for navigation keys only
 6. Test that Live no longer receives keystrokes
 
+### 2026-01-15: Command Module Refactor (CommonJS)
+
+**Status:** Complete
+
+**Problem:** Commands were defined inline in main.js (~667 lines), and JSON files in `src/commands/` were unused. Max v8 doesn't support `require()` for JSON files or file system access.
+
+**Solution:** Convert JSON files to CommonJS modules that export command arrays:
+
+```javascript
+// src/commands/transport.js
+const transportCommands = [
+    { id: "transport.play", title: "Play", ... }
+];
+module.exports = transportCommands;
+```
+
+**Changes:**
+- Created 6 CommonJS modules in `src/commands/`:
+  - `transport.js` (8 commands)
+  - `tracks.js` (10 commands)
+  - `navigation.js` (7 commands)
+  - `devices.js` (25 commands)
+  - `clips.js` (15 commands)
+  - `scenes.js` (10 commands)
+- Updated `main.js` to `require()` command modules at top of file
+- Removed ~667 lines of inline command definitions from `main.js`
+- Deleted unused `.json` files
+- Added debug logging to verify module loading
+
+**Result:**
+- `main.js` reduced from ~997 lines to ~330 lines
+- Commands now properly modularized and maintainable
+- Total: 75 commands loaded successfully
+
 ---
 
 *Last Updated: 2026-01-15*
