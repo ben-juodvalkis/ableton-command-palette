@@ -17,6 +17,10 @@ mgraphics.autofill = 0;
 // ============================================================================
 
 const CONFIG = {
+    // Window dimensions (must match window.js)
+    windowWidth: 500,
+    windowHeight: 400,
+
     // Colors (dark theme matching Ableton)
     colors: {
         background: [0.118, 0.118, 0.118, 1.0],      // #1e1e1e
@@ -50,7 +54,7 @@ const CONFIG = {
 // ============================================================================
 
 let displayState = {
-    visible: false,
+    visible: true,  // Always visible when window is open
     query: "",
     selected: 0,
     commands: [],  // Array of {title, category}
@@ -91,39 +95,22 @@ function bang() {
 // ============================================================================
 
 function paint() {
-    const width = this.box.rect[2] - this.box.rect[0];
-    const height = this.box.rect[3] - this.box.rect[1];
+    const pres = this.box.getattr("presentation_rect");
+    const width = pres ? pres[2] : CONFIG.windowWidth;
+    const height = pres ? pres[3] : CONFIG.windowHeight;
 
     // Clear background
     setColor(CONFIG.colors.background);
     mgraphics.rectangle(0, 0, width, height);
     mgraphics.fill();
 
-    if (!displayState.visible) {
-        drawClosedState(width, height);
-        return;
-    }
-
+    // Always draw palette - window visibility handled by pcontrol
     drawPalette(width, height);
 }
 
 // ============================================================================
 // DRAWING FUNCTIONS
 // ============================================================================
-
-function drawClosedState(width, height) {
-    setColor(CONFIG.colors.textDim);
-    mgraphics.select_font_face(CONFIG.fontName);
-    mgraphics.set_font_size(CONFIG.smallFontSize);
-
-    const hint = "MIDI map the toggle to open palette";
-    const extents = mgraphics.text_measure(hint);
-    const x = (width - extents[0]) / 2;
-    const y = (height + extents[1]) / 2;
-
-    mgraphics.move_to(x, y);
-    mgraphics.show_text(hint);
-}
 
 function drawPalette(width, height) {
     let y = CONFIG.padding;

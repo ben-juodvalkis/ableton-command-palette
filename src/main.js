@@ -217,7 +217,7 @@ function search(query) {
  * @param {number} keycode - ASCII key code from Max key object
  */
 function keydown(keycode) {
-    if (!paletteVisible) return;
+    // Window visibility now handled by pcontrol, always process keys
 
     // Navigation and control keys
     switch (keycode) {
