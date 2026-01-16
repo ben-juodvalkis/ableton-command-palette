@@ -33,7 +33,7 @@ Want a new command added? [Open an issue](https://github.com/ben-juodvalkis/able
 
 Ready to write code? Here's how:
 
-1. Clone the repository
+1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/your-feature`
 3. Make your changes
 4. Test in Ableton Live 12
@@ -50,9 +50,9 @@ Ready to write code? Here's how:
 
 ### Getting Started
 
-1. Clone the repository:
+1. Clone your fork:
    ```bash
-   git clone https://github.com/ben-juodvalkis/ableton-command-palette.git
+   git clone https://github.com/YOUR_USERNAME/ableton-command-palette.git
    ```
 
 2. Open the project in your editor
