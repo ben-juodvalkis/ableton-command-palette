@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Command Reference
+    url: https://github.com/ben-juodvalkis/ableton-command-palette/blob/main/COMMANDS.md
+    about: Check existing and planned commands before requesting a new one
+  - name: Roadmap
+    url: https://github.com/ben-juodvalkis/ableton-command-palette/blob/main/ROADMAP.md
+    about: See what's planned for future versions
